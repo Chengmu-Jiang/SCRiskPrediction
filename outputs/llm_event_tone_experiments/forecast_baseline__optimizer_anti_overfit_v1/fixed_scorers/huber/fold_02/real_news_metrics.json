@@ -1,0 +1,43 @@
+{
+  "scorer_kind": "huber",
+  "training_source": "daily_compressions.csv",
+  "unmatched_real_news_assigned_split": "train",
+  "encoder_model": "C:/Users/Administrator/.cache/modelscope/hub/models/BAAI/bge-base-en-v1.5",
+  "pooling": "cls",
+  "metrics": {
+    "train": {
+      "count": 36,
+      "mse": 5.896877990330769e-16,
+      "rmse": 2.4283488197396125e-08,
+      "mae": 4.286654622314639e-09,
+      "r2": 1.0
+    },
+    "val": {
+      "count": 12,
+      "mse": 25.515909514748945,
+      "rmse": 5.051327500246736,
+      "mae": 4.647153265192883,
+      "r2": -5.0053614856275725
+    },
+    "test": {
+      "count": 12,
+      "mse": 19.879664392992048,
+      "rmse": 4.458661726683473,
+      "mae": 3.8809493607369006,
+      "r2": -0.6695440251879274
+    },
+    "all": {
+      "count": 60,
+      "mse": 9.079114781548203,
+      "rmse": 3.0131569460531265,
+      "mae": 1.70562052775795,
+      "r2": 0.33274045207168945
+    }
+  },
+  "huber_alpha": 0.0001,
+  "huber_epsilon": 1.35,
+  "huber_max_iter": 5000,
+  "huber_n_iter": 276,
+  "split_strategy": "time-series-fold",
+  "fold": 2
+}

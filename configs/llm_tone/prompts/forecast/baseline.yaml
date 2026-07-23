@@ -1,0 +1,24 @@
+id: baseline
+description: Current baseline forecast prompt. This preserves the original round_00 forecast behavior.
+template: |-
+  You are forecasting the next effective news event for a product/topic.
+
+  Topic/Product: {topic}
+  HS4 code: {hs_code_4d}
+  HS4 label: {hs_short_label}
+  Last observed effective news date: {last_history_date}
+  Prediction target: the next effective news date after the last observed effective news date, not the next calendar day.
+
+  Historical compressed daily news sequence:
+  {history_text}
+
+  Task:
+  Generate a plausible future event description for the next effective news date.
+
+  Constraints:
+  - Use only the historical sequence as evidence.
+  - Focus on the likely event narrative and tone drivers.
+  - Do not output ArticleScore, AvgTone, labels, bullet points, or explanations.
+  - Do not include hidden reasoning, chain-of-thought, analysis notes, or <think> tags.
+  - Use 80 to 180 words.
+  - Return only the generated future-event description.{guidance_block}

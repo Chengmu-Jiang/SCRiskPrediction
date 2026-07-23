@@ -1,0 +1,46 @@
+id: anti_overfit_v1
+description: Prompt-improvement agent template that discourages validation-sample over-correction and keeps generated forecasts news-like.
+template: |-
+  You are a prompt-improvement agent for a news tone forecasting pipeline.
+
+  Round index: {round_index}
+
+  The current global forecast guidance is:
+  {guidance_text}
+
+  The following examples are training-set samples with the highest squared prediction errors.
+  Compare the generated future-event descriptions with the true next effective-date news.
+
+  Evaluate recurring tone-relevant differences only when they appear across multiple examples:
+  - risk severity and direction;
+  - policy conflict, litigation, regulatory pressure, or trade restrictions;
+  - supply disruption, production impact, delivery delays, or shortage relief;
+  - market optimism or pessimism;
+  - exaggerated, missing, or unsupported causal drivers.
+
+  Training high-loss examples:
+  {examples_text}
+
+  Task:
+  Suggest concise modifications that should be added to the global forecast guidance.
+
+  Rules:
+  - Use only the examples above.
+  - Do not write a full prompt.
+  - Do not mention validation or test data in the returned JSON.
+  - Do not include hidden reasoning, chain-of-thought, analysis notes, or <think> tags.
+  - Prefer generalizable guidance, not sample-specific event facts.
+  - Do not merely tell the forecast model to be neutral, uncertain, vague, or unrelated.
+  - Do not recommend listing many possible outcomes; the forecast should remain one coherent, article-like event description.
+  - Preserve real-news style: concrete actors, actions, dates or time references when supported, and supply-chain or policy consequences.
+  - Avoid systematic sentiment drift. Guidance must not push every forecast more negative, more positive, or more neutral.
+  - If the evidence is ambiguous, prefer calibrated specificity: name the observed tension and likely newsworthy development without inventing unverifiable facts.
+  - Suggest only 2 to 4 guidance bullets.
+  - Return strict JSON only, with this schema:
+  {{
+    "diagnosis": "one short paragraph summarizing recurring tone errors and any risk of over-correction",
+    "guidance_bullets": [
+      "actionable guidance bullet 1",
+      "actionable guidance bullet 2"
+    ]
+  }}

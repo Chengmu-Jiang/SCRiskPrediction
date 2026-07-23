@@ -1,0 +1,45 @@
+# @package _global_
+
+output_dir: "${paths.root_dir}/outputs/structured_hparam/edp_010"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/structured_hparam/edp_010"
+
+llm_forecast_csv: "${paths.root_dir}/outputs/llm_event_tone_experiments_expanded/forecast_baseline__optimizer_legacy/prompt_optimization/final/forecast_events.csv"
+llm_embedding_npz: "${paths.root_dir}/outputs/llm_event_tone_experiments_expanded/forecast_baseline__optimizer_legacy/prompt_optimization/final/forecast_event_embeddings.npz"
+
+seed: 42
+epochs: 300
+lr: 3e-4
+weight_decay: 3e-4
+grad_clip_norm: 5.0
+checkpoint_metric: "val_supervised"
+early_stopping_patience: 20
+early_stopping_min_delta: 1e-4
+tscv_n_splits: 5
+log_every: 5
+
+projection_dim: 64
+representation_dim: 64
+graph_state_dim: 64
+sent_hidden_sizes: "128"
+eval_hidden_sizes: "64"
+
+dropout: 0.1
+graph_dropout: 0.1
+eval_dropout: 0.1
+
+smooth_weight: 0.0
+propagation_model: "lstm_component_fusion_gated_reaction_diffusion"
+diffusion_mode: "deviation"
+initial_state_mode: "igpc"
+enable_graph_diffusion: true
+enable_two_hop_diffusion: false
+enable_recovery: true
+component_scale_mode: "learnable"
+component_scale_init: 0.5
+rd_fusion_gate_init: 0.95
+
+align_weight: 0.75
+align_temperature: 0.03
+align_dim: 64
+align_hidden_sizes: ""
+align_dropout: 0.1

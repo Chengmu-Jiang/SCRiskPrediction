@@ -1,0 +1,34 @@
+{
+  "round": "round_02",
+  "round_dir": "C:\\00-学海无涯\\我的工作\\SCRiskPrediction\\outputs\\llm_event_tone_experiments_expanded\\forecast_baseline_one_shot_v1__optimizer_legacy\\prompt_optimization\\round_02",
+  "metrics": {
+    "train": {
+      "count": 52,
+      "mse": 11.889741958877407,
+      "rmse": 3.448150512793403,
+      "mae": 2.5997546188605765,
+      "r2": 0.09288648698590762
+    },
+    "val": {
+      "count": 13,
+      "mse": 10.80684316660693,
+      "rmse": 3.287376334800585,
+      "mae": 2.5519822002161114,
+      "r2": 0.16469151266199344
+    },
+    "test": {
+      "count": 12,
+      "mse": 6.1784682693858235,
+      "rmse": 2.4856524836319784,
+      "mae": 1.9224616393976754,
+      "r2": 0.2683148917773558
+    },
+    "all": {
+      "count": 77,
+      "mse": 10.816846263118768,
+      "rmse": 3.2888974236237236,
+      "mae": 2.4861369929393704,
+      "r2": 0.14348484908475612
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "num_samples": 89,
+  "win": 5,
+  "split_strategy": "time-series",
+  "split_counts": {
+    "test": 12,
+    "train": 65,
+    "val": 12
+  },
+  "topic_counts": {
+    "Automaker": 40,
+    "Nexperia": 49
+  },
+  "history_len_counts": {
+    "1": 2,
+    "2": 2,
+    "3": 2,
+    "4": 2,
+    "5": 81
+  },
+  "time_series_cv": {
+    "tscv_n_splits": 5,
+    "tscv_test_size": null,
+    "tscv_gap": 0,
+    "final_test_ratio": 0.15,
+    "final_fold": {
+      "fold": 4,
+      "train_count": 65,
+      "val_count": 12,
+      "test_count": 12,
+      "train_date_count": 56,
+      "val_date_count": 11,
+      "test_date_count": 12,
+      "gap": 0,
+      "val_size": 11,
+      "train_start_time": 0,
+      "train_end_time": 55,
+      "val_start_time": 56,
+      "val_end_time": 66,
+      "test_start_time": 67,
+      "test_end_time": 78,
+      "train_start_date": "2025-09-30",
+      "train_end_date": "2026-02-25",
+      "val_start_date": "2026-03-04",
+      "val_end_date": "2026-03-20",
+      "test_start_date": "2026-03-21",
+      "test_end_date": "2026-06-05"
+    }
+  }
+}

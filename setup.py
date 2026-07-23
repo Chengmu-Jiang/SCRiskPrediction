@@ -5,11 +5,20 @@ from setuptools import find_packages, setup
 setup(
     name="src",
     version="0.0.1",
-    description="Describe Your Cool Project",
+    description="Structured supply-chain risk prediction with Hydra configs",
     author="",
     author_email="",
     url="https://github.com/user/project",
-    install_requires=["lightning", "hydra-core"],
+    install_requires=[
+        "hydra-core",
+        "numpy<2",
+        "openai",
+        "pandas",
+        "scikit-learn",
+        "tensorboard",
+        "torch",
+        "transformers",
+    ],
     packages=find_packages(),
     # use this to customize global commands available in the terminal after installing the package
     entry_points={

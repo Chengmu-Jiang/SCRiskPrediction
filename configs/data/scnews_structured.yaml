@@ -1,0 +1,26 @@
+# Paths remain configurable; these defaults reference this project's local data directory.
+data_root: "${paths.root_dir}/data"
+news_csv: "${data.data_root}/News/DailyTop_News/all_article_scores.csv"
+label_csv: "${data.data_root}/News/DailyTop_News/daily_top_news.csv"
+nodes_csv: "${data.data_root}/IndustryChain/Filtered_Node_List_by_IGPC.csv"
+edges_csv: "${data.data_root}/IndustryChain/Wafer2ElectricVehicle_network_edges.csv"
+encoding: "utf-8-sig"
+
+topic_col: "Topic"
+date_col: "Date"
+target_col: "ArticleScore"
+title_col: "Article_Title"
+text_col: "Article_Text"
+daily_group_cols: "topic,date_yyyymmdd"
+fill_missing_gdelt: 0.0
+
+node_code_col: "hs_code_4d"
+igpc_col: "IGPC"
+edge_upstream_col: "hs2022_code_upstream"
+edge_downstream_col: "hs2022_code_downstream"
+edge_weight_col: ""
+graph_direction: "downstream-to-upstream"
+topic_hs_map: []
+
+max_rows: null
+max_label_rows: null

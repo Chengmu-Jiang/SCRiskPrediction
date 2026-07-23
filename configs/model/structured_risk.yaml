@@ -1,0 +1,63 @@
+encoder_model: "C:/Users/Administrator/.cache/modelscope/hub/models/BAAI/bge-base-en-v1.5"
+encoder_device: "auto"
+encoder_max_length: 512
+embedding_batch_size: 16
+pooling: "cls"
+normalize_text_embeddings: true
+
+train_device: "auto"
+representation_batch_size: 256
+checkpoint: null
+seed: 42
+no_final_layer_norm: false
+
+graph_risk_hidden_sizes: ""
+graph_recovery_hidden_sizes: "256"
+propagation_model: "reaction_diffusion"
+gat_heads: 4
+dcrnn_diffusion_steps: 2
+dcrnn_bidirectional: false
+component_scale_mode: "learnable"
+component_scale_init: 0.01
+rd_fusion_gate_init: 0.1
+propagation_dt: 1.0
+alpha_init: 0.1
+beta_init: 0.1
+gamma_init: 0.1
+eta_init: 0.1
+recovery_eps: 1e-6
+diffusion_mode: "deviation"
+initial_state_mode: "igpc"
+enable_graph_diffusion: true
+enable_two_hop_diffusion: true
+enable_recovery: true
+graph_checkpoint: null
+
+upstream_node_code: "3818"
+downstream_node_code: "8703"
+upstream_loss_weight: 1.0
+
+align_weight: 0.6
+align_temperature: 0.07
+align_dim: 64
+align_hidden_sizes: ""
+align_dropout: 0.3
+llm_forecast_csv: "${paths.root_dir}/outputs/llm_event_tone/prompt_optimization/final/forecast_events.csv"
+llm_embedding_npz: "${paths.root_dir}/outputs/llm_event_tone/prompt_optimization/final/forecast_event_embeddings.npz"
+
+checkpoint_metric: "val_supervised"
+early_stopping_patience: 10
+epochs: 100
+tscv_n_splits: 5
+lr: 3e-4
+weight_decay: 3e-4
+dropout: 0.3
+graph_dropout: 0.3
+eval_dropout: 0.3
+projection_dim: 64
+representation_dim: 64
+graph_state_dim: 64
+sent_hidden_sizes: "128"
+eval_hidden_sizes: "64"
+smooth_weight: 0.0
+log_every: 5

@@ -1,0 +1,6 @@
+﻿fold,train_count,val_count,test_count,gap,val_size,train_start_time,train_end_time,val_start_time,val_end_time,test_start_time,test_end_time
+0,11,10,11,0,10,1,11,12,21,62,72
+1,21,10,11,0,10,1,21,22,31,62,72
+2,31,10,11,0,10,1,31,32,41,62,72
+3,41,10,11,0,10,1,41,42,51,62,72
+4,51,10,11,0,10,1,51,52,61,62,72

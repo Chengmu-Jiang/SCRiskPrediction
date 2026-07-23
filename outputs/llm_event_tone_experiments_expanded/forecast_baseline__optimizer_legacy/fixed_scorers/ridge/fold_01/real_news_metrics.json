@@ -1,0 +1,48 @@
+{
+  "scorer_kind": "ridge",
+  "training_source": "daily_compressions.csv",
+  "unmatched_real_news_assigned_split": "train",
+  "encoder_model": "C:/Users/Administrator/.cache/modelscope/hub/models/BAAI/bge-base-en-v1.5",
+  "pooling": "cls",
+  "metrics": {
+    "train": {
+      "count": 26,
+      "mse": 0.27793296937895134,
+      "rmse": 0.5271934838168538,
+      "mae": 0.3997790248498034,
+      "r2": 0.976236299295728
+    },
+    "val": {
+      "count": 15,
+      "mse": 13.575660297396949,
+      "rmse": 3.6845162908307176,
+      "mae": 2.8598359603141827,
+      "r2": 0.1100674559817777
+    },
+    "test": {
+      "count": 12,
+      "mse": 7.601717801425786,
+      "rmse": 2.7571212888492567,
+      "mae": 2.4412705717150716,
+      "r2": 0.09976656515755966
+    },
+    "all": {
+      "count": 53,
+      "mse": 5.6996561373946495,
+      "rmse": 2.3873952620784538,
+      "mae": 1.5582460549318582,
+      "r2": 0.5317737716938207
+    }
+  },
+  "ridge_alphas": [
+    0.01,
+    0.1,
+    1.0,
+    10.0,
+    100.0,
+    1000.0
+  ],
+  "ridge_selected_alpha": 100.0,
+  "split_strategy": "time-series-fold",
+  "fold": 1
+}

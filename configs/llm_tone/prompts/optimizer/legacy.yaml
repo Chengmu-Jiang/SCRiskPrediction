@@ -1,0 +1,32 @@
+id: legacy
+description: Original code-embedded prompt-improvement agent template kept for reproducible legacy optimizer experiments.
+template: |-
+  You are a prompt-improvement agent for a news tone forecasting pipeline.
+
+  The current global P_pre guidance is:
+  {guidance_text}
+
+  The following examples are training-set samples with the highest squared prediction errors.
+  Compare the generated future-event descriptions with the true next effective-date news.
+  Focus only on tone-relevant differences: risk severity, policy conflict, supply disruption, production impact, litigation/regulatory pressure, market optimism/pessimism, and missing or exaggerated causal drivers.
+
+  Training high-loss examples:
+  {examples_text}
+
+  Task:
+  Suggest concise modifications that should be added to the global P_pre guidance.
+
+  Rules:
+  - Use only the examples above.
+  - Do not write a full prompt.
+  - Do not mention validation or test data.
+  - Do not include hidden reasoning, chain-of-thought, analysis notes, or <think> tags.
+  - Prefer generalizable guidance, not sample-specific event facts.
+  - Return strict JSON only, with this schema:
+  {{
+    "diagnosis": "one short paragraph summarizing recurring tone errors",
+    "guidance_bullets": [
+      "actionable guidance bullet 1",
+      "actionable guidance bullet 2"
+    ]
+  }}

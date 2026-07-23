@@ -1,0 +1,45 @@
+{
+  "target_mean_train": -3.8523615343596918,
+  "target_std_train": 3.620390331178255,
+  "best_val_loss_scaled": 0.9063339829444885,
+  "best_epoch": 11,
+  "epochs_run": 41,
+  "encoder_model": "C:/Users/Administrator/.cache/modelscope/hub/models/BAAI/bge-base-en-v1.5",
+  "encoder_device": "cuda",
+  "train_device": "cuda",
+  "resolved_train_device": "cuda",
+  "pooling": "cls",
+  "win": 5,
+  "split_strategy": "time-series-fold",
+  "metrics": {
+    "train": {
+      "count": 52,
+      "mse": 8.951179553044186,
+      "rmse": 2.99185219438464,
+      "mae": 2.2887431236289317,
+      "r2": 0.3170805591857885
+    },
+    "val": {
+      "count": 13,
+      "mse": 11.879523200397166,
+      "rmse": 3.446668420431122,
+      "mae": 2.2377460944340934,
+      "r2": 0.0817793501914863
+    },
+    "test": {
+      "count": 12,
+      "mse": 5.54431857847529,
+      "rmse": 2.354637674563815,
+      "mae": 1.8573568872027335,
+      "r2": 0.34341406927452434
+    },
+    "all": {
+      "count": 77,
+      "mse": 8.91463586110603,
+      "rmse": 2.985738746291448,
+      "mae": 2.212904211724422,
+      "r2": 0.294108421789831
+    }
+  },
+  "fold": 3
+}

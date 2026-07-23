@@ -1,0 +1,213 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="980" viewBox="0 0 1800 980">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7f9fc"/>
+      <stop offset="100%" stop-color="#eef3f8"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8f1ff"/>
+      <stop offset="100%" stop-color="#d7e8ff"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e2f7f3"/>
+      <stop offset="100%" stop-color="#c9eee8"/>
+    </linearGradient>
+    <linearGradient id="amber" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff3dc"/>
+      <stop offset="100%" stop-color="#ffe4ae"/>
+    </linearGradient>
+    <linearGradient id="violet" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eee9ff"/>
+      <stop offset="100%" stop-color="#ddd3ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#10213f" flood-opacity="0.13"/>
+    </filter>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#10213f" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 14 7 L 0 14 z" fill="#31435f"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 14 7 L 0 14 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowTeal" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 14 7 L 0 14 z" fill="#0f766e"/>
+    </marker>
+    <style>
+      .title { font: 700 34px "Arial", "Microsoft YaHei", sans-serif; fill: #142033; letter-spacing: 0; }
+      .subtitle { font: 500 18px "Arial", "Microsoft YaHei", sans-serif; fill: #56667d; letter-spacing: 0; }
+      .section { font: 700 20px "Arial", "Microsoft YaHei", sans-serif; fill: #172033; letter-spacing: 0; }
+      .label { font: 600 16px "Arial", "Microsoft YaHei", sans-serif; fill: #1b2a40; letter-spacing: 0; }
+      .small { font: 500 13px "Arial", "Microsoft YaHei", sans-serif; fill: #506178; letter-spacing: 0; }
+      .tiny { font: 500 12px "Arial", "Microsoft YaHei", sans-serif; fill: #64748b; letter-spacing: 0; }
+      .math { font: 600 14px "Cambria Math", "Times New Roman", serif; fill: #263449; letter-spacing: 0; }
+      .panel { fill: #ffffff; stroke: #d7e0ea; stroke-width: 1.4; rx: 18; filter: url(#shadow); }
+      .box { stroke: #cad6e3; stroke-width: 1.2; rx: 14; filter: url(#softShadow); }
+      .chip { fill: #f5f8fb; stroke: #dae3ed; stroke-width: 1; rx: 18; }
+      .arrow { fill: none; stroke: #31435f; stroke-width: 2.4; marker-end: url(#arrow); }
+      .arrowThin { fill: none; stroke: #7c8ca3; stroke-width: 1.7; marker-end: url(#arrow); }
+      .arrowBlue { fill: none; stroke: #2563eb; stroke-width: 2.2; marker-end: url(#arrowBlue); }
+      .arrowTeal { fill: none; stroke: #0f766e; stroke-width: 2.2; marker-end: url(#arrowTeal); }
+      .dash { fill: none; stroke: #8aa0b8; stroke-width: 1.6; stroke-dasharray: 7 6; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1800" height="980" fill="url(#bg)"/>
+  <text x="70" y="58" class="title">LSTM Component-Fusion Gated Reaction-Diffusion Propagation</text>
+  <text x="70" y="88" class="subtitle">Message propagation over an industry graph with direct news injection, recovery reaction, graph diffusion, component gates, and an RD fusion gate.</text>
+
+  <!-- left input panel -->
+  <rect x="55" y="125" width="650" height="770" class="panel"/>
+  <text x="88" y="168" class="section">1. News-to-Node Risk Construction</text>
+
+  <rect x="90" y="205" width="245" height="142" fill="url(#blue)" class="box"/>
+  <text x="118" y="236" class="label">News Events</text>
+  <rect x="116" y="258" width="84" height="30" class="chip"/>
+  <text x="137" y="278" class="tiny">GDELT</text>
+  <rect x="212" y="258" width="86" height="30" class="chip"/>
+  <text x="236" y="278" class="tiny">Text</text>
+  <text x="116" y="314" class="small">event features + embeddings</text>
+
+  <rect x="390" y="205" width="245" height="142" fill="url(#teal)" class="box"/>
+  <text x="420" y="236" class="label">News Encoder</text>
+  <text x="420" y="266" class="math">r<tspan baseline-shift="sub" font-size="11">t,u</tspan> = f<tspan baseline-shift="sub" font-size="11">sent</tspan>(φ<tspan baseline-shift="sub" font-size="11">g</tspan>, φ<tspan baseline-shift="sub" font-size="11">z</tspan>)</text>
+  <text x="420" y="302" class="small">learned risk representation</text>
+
+  <path d="M 335 276 L 382 276" class="arrow"/>
+
+  <rect x="90" y="405" width="545" height="172" fill="#fff" class="box"/>
+  <text x="120" y="438" class="label">Node-Time Aggregation</text>
+  <text x="120" y="469" class="small">scatter news vectors by date and HS4 node, then average duplicates</text>
+  <text x="120" y="505" class="math">X<tspan baseline-shift="sub" font-size="11">t,i</tspan> = mean{ r<tspan baseline-shift="sub" font-size="11">t,u</tspan> | node(u)=i }</text>
+  <text x="120" y="541" class="math">M<tspan baseline-shift="sub" font-size="11">t,i</tspan> ∈ {0,1} marks direct news shock</text>
+
+  <path d="M 512 347 C 512 374 420 378 400 405" class="arrow"/>
+
+  <rect x="90" y="636" width="245" height="174" fill="url(#amber)" class="box"/>
+  <text x="120" y="669" class="label">Initial State</text>
+  <text x="120" y="702" class="math">h<tspan baseline-shift="sub" font-size="11">0</tspan> = σ(W log(1+IGPC))</text>
+  <text x="120" y="735" class="small">node-specific baseline risk state</text>
+  <text x="120" y="768" class="tiny">mode: igpc / learnable / fixed_zero</text>
+
+  <rect x="390" y="636" width="245" height="174" fill="url(#violet)" class="box"/>
+  <text x="420" y="669" class="label">Industry Graph</text>
+  <text x="420" y="701" class="math">A<tspan baseline-shift="sub" font-size="11">norm</tspan> with self loops</text>
+  <text x="420" y="735" class="small">supply-chain neighborhood</text>
+  <g transform="translate(466,760)">
+    <circle cx="0" cy="0" r="12" fill="#2563eb"/>
+    <circle cx="78" cy="-18" r="12" fill="#0f766e"/>
+    <circle cx="140" cy="24" r="12" fill="#f59e0b"/>
+    <circle cx="56" cy="48" r="12" fill="#7c3aed"/>
+    <line x1="12" y1="-3" x2="66" y2="-15" stroke="#72839b" stroke-width="2"/>
+    <line x1="88" y1="-12" x2="130" y2="17" stroke="#72839b" stroke-width="2"/>
+    <line x1="130" y1="27" x2="68" y2="45" stroke="#72839b" stroke-width="2"/>
+    <line x1="50" y1="39" x2="8" y2="9" stroke="#72839b" stroke-width="2"/>
+  </g>
+
+  <!-- center propagation panel -->
+  <rect x="755" y="125" width="720" height="770" class="panel"/>
+  <text x="788" y="168" class="section">2. Per-Time-Step Propagation Cell</text>
+  <rect x="788" y="190" width="650" height="48" fill="#f8fafc" stroke="#dbe5ef" stroke-width="1.2" rx="14"/>
+  <text x="815" y="220" class="small">For each time step t and all graph nodes i = 1..N, the cell updates hidden state h and memory c.</text>
+
+  <rect x="790" y="280" width="185" height="124" fill="url(#blue)" class="box"/>
+  <text x="820" y="312" class="label">Inject</text>
+  <text x="820" y="344" class="math">h<tspan baseline-shift="sub" font-size="11">inj</tspan> = Δt η z<tspan baseline-shift="sub" font-size="11">t</tspan></text>
+  <text x="820" y="374" class="small">direct news signal</text>
+
+  <rect x="1018" y="280" width="185" height="124" fill="url(#amber)" class="box"/>
+  <text x="1048" y="312" class="label">React</text>
+  <text x="1048" y="344" class="math">v<tspan baseline-shift="sub" font-size="11">rec</tspan> = softplus(f<tspan baseline-shift="sub" font-size="11">rec</tspan>[h,z])</text>
+  <text x="1048" y="374" class="math">pull h → h<tspan baseline-shift="sub" font-size="11">0</tspan></text>
+
+  <rect x="1246" y="280" width="185" height="124" fill="url(#teal)" class="box"/>
+  <text x="1276" y="312" class="label">Diffuse</text>
+  <text x="1276" y="344" class="math">L(h-h<tspan baseline-shift="sub" font-size="11">0</tspan>)</text>
+  <text x="1276" y="374" class="small">1-hop + optional 2-hop</text>
+
+  <rect x="790" y="460" width="185" height="100" fill="#ffffff" class="box"/>
+  <text x="815" y="492" class="label">Inject Gate</text>
+  <text x="815" y="523" class="math">g<tspan baseline-shift="sub" font-size="11">inj</tspan> = σ(W[h,z])</text>
+
+  <rect x="1018" y="460" width="185" height="100" fill="#ffffff" class="box"/>
+  <text x="1043" y="492" class="label">React Gate</text>
+  <text x="1043" y="523" class="math">g<tspan baseline-shift="sub" font-size="11">rec</tspan> = σ(W[h,z])</text>
+
+  <rect x="1246" y="460" width="185" height="100" fill="#ffffff" class="box"/>
+  <text x="1271" y="492" class="label">Diff Gate</text>
+  <text x="1271" y="523" class="math">g<tspan baseline-shift="sub" font-size="11">diff</tspan> = σ(W[h,z])</text>
+
+  <path d="M 882 405 L 882 452" class="arrowBlue"/>
+  <path d="M 1110 405 L 1110 452" class="arrowBlue"/>
+  <path d="M 1338 405 L 1338 452" class="arrowBlue"/>
+
+  <rect x="890" y="625" width="355" height="116" fill="#f8fafc" class="box"/>
+  <text x="920" y="657" class="label">Component-wise RD Sum</text>
+  <text x="920" y="690" class="math">RD<tspan baseline-shift="sub" font-size="11">t</tspan> = s<tspan baseline-shift="sub" font-size="11">inj</tspan>g<tspan baseline-shift="sub" font-size="11">inj</tspan>h<tspan baseline-shift="sub" font-size="11">inj</tspan> + s<tspan baseline-shift="sub" font-size="11">rec</tspan>g<tspan baseline-shift="sub" font-size="11">rec</tspan>h<tspan baseline-shift="sub" font-size="11">rec</tspan> + s<tspan baseline-shift="sub" font-size="11">diff</tspan>g<tspan baseline-shift="sub" font-size="11">diff</tspan>h<tspan baseline-shift="sub" font-size="11">diff</tspan></text>
+  <text x="920" y="718" class="small">learnable component scales when enabled</text>
+
+  <path d="M 882 560 C 882 598 930 598 980 625" class="arrow"/>
+  <path d="M 1110 560 L 1110 617" class="arrow"/>
+  <path d="M 1338 560 C 1338 598 1222 598 1170 625" class="arrow"/>
+
+  <rect x="1282" y="620" width="150" height="120" fill="url(#violet)" class="box"/>
+  <text x="1308" y="652" class="label">RD Fusion</text>
+  <text x="1306" y="684" class="math">g<tspan baseline-shift="sub" font-size="11">RD</tspan> = σ(W[h,z])</text>
+  <text x="1306" y="713" class="small">global RD gate</text>
+
+  <path d="M 1245 683 L 1274 683" class="arrow"/>
+
+  <rect x="850" y="790" width="505" height="72" fill="#ffffff" class="box"/>
+  <text x="880" y="820" class="label">LSTM Memory Update</text>
+  <text x="880" y="847" class="math">c<tspan baseline-shift="sub" font-size="11">t</tspan> = f⊙c<tspan baseline-shift="sub" font-size="11">t-1</tspan> + i⊙ĉ<tspan baseline-shift="sub" font-size="11">t</tspan> + g<tspan baseline-shift="sub" font-size="11">RD</tspan>⊙RD<tspan baseline-shift="sub" font-size="11">t</tspan>,   h<tspan baseline-shift="sub" font-size="11">t</tspan> = o⊙tanh(c<tspan baseline-shift="sub" font-size="11">t</tspan>)</text>
+
+  <path d="M 1068 741 L 1068 782" class="arrow"/>
+  <path d="M 1357 740 C 1357 770 1300 778 1228 790" class="arrow"/>
+
+  <!-- incoming arrows from left -->
+  <path d="M 635 491 C 700 491 720 335 785 335" class="arrowBlue"/>
+  <text x="658" y="470" class="tiny">z<tspan baseline-shift="sub" font-size="9">t</tspan> = risk_projector(X<tspan baseline-shift="sub" font-size="9">t</tspan>) ⊙ M<tspan baseline-shift="sub" font-size="9">t</tspan></text>
+  <path d="M 335 720 C 515 720 610 790 846 820" class="dash"/>
+  <path d="M 635 720 C 720 720 1080 240 1338 280" class="dash"/>
+
+  <!-- top recurrent context -->
+  <path d="M 1120 862 C 1110 915 800 920 795 815 C 790 720 810 620 850 560" fill="none" stroke="#9aa9bb" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow)"/>
+  <text x="820" y="885" class="tiny">recurrent state carries historical risk memory</text>
+
+  <!-- right output panel -->
+  <rect x="1530" y="125" width="220" height="770" class="panel"/>
+  <text x="1560" y="168" class="section">3. Outputs</text>
+
+  <rect x="1560" y="240" width="160" height="128" fill="url(#blue)" class="box"/>
+  <text x="1588" y="272" class="label">Propagated</text>
+  <text x="1588" y="299" class="label">Node States</text>
+  <text x="1588" y="332" class="math">H ∈ R<tspan baseline-shift="super" font-size="10">T×N×d</tspan></text>
+
+  <rect x="1560" y="450" width="160" height="120" fill="url(#amber)" class="box"/>
+  <text x="1588" y="484" class="label">Risk Head</text>
+  <text x="1588" y="517" class="math">ŷ<tspan baseline-shift="sub" font-size="11">t,i</tspan> = MLP(h<tspan baseline-shift="sub" font-size="11">t,i</tspan>)</text>
+  <text x="1588" y="546" class="small">ArticleScore prediction</text>
+
+  <rect x="1560" y="650" width="160" height="118" fill="url(#teal)" class="box"/>
+  <text x="1588" y="682" class="label">Training Loss</text>
+  <text x="1588" y="714" class="small">supervised MSE</text>
+  <text x="1588" y="743" class="small">smoothness + alignment</text>
+
+  <path d="M 1355 826 C 1440 826 1475 304 1552 304" class="arrow"/>
+  <path d="M 1640 368 L 1640 442" class="arrow"/>
+  <path d="M 1640 570 L 1640 642" class="arrow"/>
+
+  <!-- footer legend -->
+  <rect x="55" y="915" width="1695" height="38" fill="#ffffff" stroke="#d9e3ee" stroke-width="1.2" rx="16"/>
+  <circle cx="87" cy="934" r="7" fill="#2563eb"/>
+  <text x="104" y="939" class="tiny">blue: direct news injection</text>
+  <circle cx="300" cy="934" r="7" fill="#f59e0b"/>
+  <text x="317" y="939" class="tiny">amber: recovery reaction</text>
+  <circle cx="508" cy="934" r="7" fill="#0f766e"/>
+  <text x="525" y="939" class="tiny">teal: graph diffusion</text>
+  <circle cx="716" cy="934" r="7" fill="#7c3aed"/>
+  <text x="733" y="939" class="tiny">violet: fusion or graph prior</text>
+  <text x="1010" y="939" class="tiny">Key distinction: component gates regulate each RD term, then RD fusion gate controls the total physical residual entering LSTM memory.</text>
+</svg>

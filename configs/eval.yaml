@@ -1,18 +1,9 @@
 # @package _global_
 
 defaults:
-  - _self_
-  - data: mnist # choose datamodule with `test_dataloader()` for evaluation
-  - model: mnist
-  - logger: null
-  - trainer: default
   - paths: default
-  - extras: default
   - hydra: default
+  - _self_
 
-task_name: "eval"
-
-tags: ["dev"]
-
-# passing checkpoint path is necessary for evaluation
-ckpt_path: ???
+task_name: "structured_eval"
+output_dir: "${paths.root_dir}/outputs/structured_pipeline_8703_align005_small_reg"

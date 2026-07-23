@@ -1,0 +1,1 @@
+{"task": "forecast", "item_id": "sample 40f53c842f6ce74be714", "attempt": 1, "max_attempts": 3, "prompt_hash": "86cdde95518abf04bdb35c112a53dab2", "cache_key": "c4035f10c9ed2ad04725e25bdba2dfd1", "response_info": {"backend": "api", "model": "deepseek-v4-flash", "finish_reason": "stop", "raw_content_length": 0, "has_reasoning_content": true, "reasoning_content_length": 1967}}

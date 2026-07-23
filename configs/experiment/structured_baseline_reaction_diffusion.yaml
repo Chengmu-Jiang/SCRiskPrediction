@@ -1,0 +1,38 @@
+# @package _global_
+
+output_dir: "${paths.root_dir}/outputs/structured_baselines/reaction_diffusion"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/structured_baselines/reaction_diffusion"
+
+llm_forecast_csv: "${paths.root_dir}/outputs/llm_event_tone_experiments/forecast_baseline__optimizer_legacy/prompt_optimization/final/forecast_events.csv"
+llm_embedding_npz: "${paths.root_dir}/outputs/llm_event_tone_experiments/forecast_baseline__optimizer_legacy/prompt_optimization/final/forecast_event_embeddings.npz"
+
+seed: 42
+epochs: 100
+lr: 3e-4
+weight_decay: 3e-4
+grad_clip_norm: 5.0
+checkpoint_metric: "val_supervised"
+early_stopping_patience: 10
+early_stopping_min_delta: 1e-4
+tscv_n_splits: 5
+log_every: 5
+
+projection_dim: 64
+representation_dim: 64
+graph_state_dim: 64
+sent_hidden_sizes: "128"
+eval_hidden_sizes: "64"
+
+dropout: 0.3
+graph_dropout: 0.3
+eval_dropout: 0.3
+
+smooth_weight: 0.0
+propagation_model: "reaction_diffusion"
+diffusion_mode: "deviation"
+
+align_weight: 0.7
+align_temperature: 0.07
+align_dim: 64
+align_hidden_sizes: ""
+align_dropout: 0.3

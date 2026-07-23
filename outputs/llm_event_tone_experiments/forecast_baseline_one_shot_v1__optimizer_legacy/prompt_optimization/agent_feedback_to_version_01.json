@@ -1,0 +1,10 @@
+{
+  "from_version": 0,
+  "to_version": 1,
+  "diagnosis": "The pipeline frequently overpredicts negative escalation and maintenance of ongoing conflict narratives, while true news often shifts to broader industry contexts, opinion pieces, or unrelated events. It also underestimates de-escalation, strategic corporate moves, and positive resolutions, leading to overly pessimistic tone and missed topic pivots.",
+  "raw_agent_text": "{\n  \"diagnosis\": \"The pipeline frequently overpredicts negative escalation and maintenance of ongoing conflict narratives, while true news often shifts to broader industry contexts, opinion pieces, or unrelated events. It also underestimates de-escalation, strategic corporate moves, and positive resolutions, leading to overly pessimistic tone and missed topic pivots.\",\n  \"guidance_bullets\": [\n    \"Avoid assuming direct continuation of the most recent event arc; consider that the next article may shift to a different stakeholder perspective, broader industry analysis, or a completely unrelated topic.\",\n    \"Ground tone in the full range of possibilities: both escalation and de-escalation, and do not default to high risk or conflict severity unless strongly supported by historical patterns; account for potential positive developments such as supply restoration or strategic adaptations.\"\n  ]\n}",
+  "suggestions": [
+    "Avoid assuming direct continuation of the most recent event arc; consider that the next article may shift to a different stakeholder perspective, broader industry analysis, or a completely unrelated topic.",
+    "Ground tone in the full range of possibilities: both escalation and de-escalation, and do not default to high risk or conflict severity unless strongly supported by historical patterns; account for potential positive developments such as supply restoration or strategic adaptations."
+  ]
+}

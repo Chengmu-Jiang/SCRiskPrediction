@@ -1,0 +1,12 @@
+{
+  "from_version": 0,
+  "to_version": 1,
+  "diagnosis": "The model systematically over-extrapolates negative supply chain disruptions, invents specific events (e.g., production halts, legal rulings), and misses the actual tone of true news which is often more diplomatic, neutral, or even off-topic. It fails to account for topic shifts and assumes continuation of the most dramatic narrative from historical news.",
+  "raw_agent_text": "{\n  \"diagnosis\": \"The model systematically over-extrapolates negative supply chain disruptions, invents specific events (e.g., production halts, legal rulings), and misses the actual tone of true news which is often more diplomatic, neutral, or even off-topic. It fails to account for topic shifts and assumes continuation of the most dramatic narrative from historical news.\",\n  \"guidance_bullets\": [\n    \"Do not invent specific dates, production halts, or legal rulings unless strongly signaled by historical news; when historical news shows diplomatic talks or uncertainty, keep predictions ambiguous or aligned with observable signals.\",\n    \"When historical news is ambiguous or shows de-escalation attempts, favor neutral or constructive tones (e.g., talks ongoing, parties seeking resolution) over escalation or crisis.\",\n    \"If historical news is dominated by one actor or narrative, consider that the true next article may come from a different perspective (e.g., Chinese government statement) or even be off-topic; avoid assuming continuation of the most dramatic narrative.\",\n    \"For topics with geopolitical tension, do not automatically predict escalation; the true news may reflect a softer stance or a call for dialogue.\"\n  ]\n}",
+  "suggestions": [
+    "Do not invent specific dates, production halts, or legal rulings unless strongly signaled by historical news; when historical news shows diplomatic talks or uncertainty, keep predictions ambiguous or aligned with observable signals.",
+    "When historical news is ambiguous or shows de-escalation attempts, favor neutral or constructive tones (e.g., talks ongoing, parties seeking resolution) over escalation or crisis.",
+    "If historical news is dominated by one actor or narrative, consider that the true next article may come from a different perspective (e.g., Chinese government statement) or even be off-topic; avoid assuming continuation of the most dramatic narrative.",
+    "For topics with geopolitical tension, do not automatically predict escalation; the true news may reflect a softer stance or a call for dialogue."
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "scorer_kind": "mlp_original_arch",
+  "training_source": "daily_compressions.csv",
+  "unmatched_real_news_assigned_split": "train",
+  "encoder_model": "C:/Users/Administrator/.cache/modelscope/hub/models/BAAI/bge-base-en-v1.5",
+  "encoder_device": "cuda",
+  "train_device": "cuda",
+  "resolved_train_device": "cuda",
+  "pooling": "cls",
+  "input_scaling": "standardize_embeddings_with_real_train_split",
+  "architecture_source": "original_non_fixed_mlp",
+  "target_mean_train": -4.840452303555446,
+  "target_std_train": 3.548687884555346,
+  "best_val_loss_scaled": 1.4474024772644043,
+  "best_epoch": 17,
+  "epochs_run": 47,
+  "early_stop_split": "val",
+  "mlp_hidden_sizes": [
+    256,
+    64
+  ],
+  "mlp_dropout": 0.2,
+  "mlp_batch_size": 16,
+  "mlp_epochs": 300,
+  "mlp_lr": 0.001,
+  "mlp_weight_decay": 0.0001,
+  "mlp_patience": 30,
+  "mlp_min_delta": 1e-05,
+  "parameter_count": 213377,
+  "metrics": {
+    "train": {
+      "count": 36,
+      "mse": 0.34880337342646306,
+      "rmse": 0.5905957783683041,
+      "mae": 0.4228561418477491,
+      "r2": 0.972302213142831
+    },
+    "val": {
+      "count": 12,
+      "mse": 18.227407235134812,
+      "rmse": 4.269356770654663,
+      "mae": 3.86910587108105,
+      "r2": -3.2899575784063515
+    },
+    "test": {
+      "count": 12,
+      "mse": 13.039969671041227,
+      "rmse": 3.6110898176369455,
+      "mae": 3.172273393748508,
+      "r2": -0.09512932525124906
+    },
+    "all": {
+      "count": 60,
+      "mse": 6.462757405291086,
+      "rmse": 2.542195390856314,
+      "mae": 1.6619895380745606,
+      "r2": 0.5250267577419572
+    }
+  },
+  "original_mlp_hidden_sizes": [
+    256,
+    64
+  ],
+  "original_mlp_dropout": 0.2,
+  "original_mlp_batch_size": 16,
+  "original_mlp_epochs": 300,
+  "original_mlp_lr": 0.001,
+  "original_mlp_weight_decay": 0.0001,
+  "original_mlp_patience": 30,
+  "original_mlp_min_delta": 1e-05,
+  "split_strategy": "time-series-fold",
+  "fold": 2
+}

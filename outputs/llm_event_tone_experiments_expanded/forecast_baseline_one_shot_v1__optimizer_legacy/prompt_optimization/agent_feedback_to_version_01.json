@@ -1,0 +1,10 @@
+{
+  "from_version": 0,
+  "to_version": 1,
+  "diagnosis": "Generated descriptions consistently overstate risk severity and conflict escalation (e.g., predicting investigations, arbitration, or production halts) while true developments are more measured, often introducing mitigating actions (supplier diversification, diplomatic overtures) or shifting narrative to pragmatic cooperation. The model also tends to miss positive or stabilizing signals and extrapolates worst-case causal drivers from tension, leading to inflated pessimism.",
+  "raw_agent_text": "{\n  \"diagnosis\": \"Generated descriptions consistently overstate risk severity and conflict escalation (e.g., predicting investigations, arbitration, or production halts) while true developments are more measured, often introducing mitigating actions (supplier diversification, diplomatic overtures) or shifting narrative to pragmatic cooperation. The model also tends to miss positive or stabilizing signals and extrapolates worst-case causal drivers from tension, leading to inflated pessimism.\",\n  \"guidance_bullets\": [\n    \"Avoid exaggerating conflict escalation or negative outcomes; weigh evidence of de-escalation, constructive talks, or operational workarounds that appear in the historical sequence.\",\n    \"Do not generate speculative future events not supported by the historical trend; prefer ambiguous or moderate language when the trajectory is uncertain and the true news often conveys tempered or mixed signals.\"\n  ]\n}",
+  "suggestions": [
+    "Avoid exaggerating conflict escalation or negative outcomes; weigh evidence of de-escalation, constructive talks, or operational workarounds that appear in the historical sequence.",
+    "Do not generate speculative future events not supported by the historical trend; prefer ambiguous or moderate language when the trajectory is uncertain and the true news often conveys tempered or mixed signals."
+  ]
+}
