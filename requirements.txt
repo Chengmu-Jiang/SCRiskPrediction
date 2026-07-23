@@ -8,7 +8,7 @@ tensorboard
 openai
 
 # --------- hydra --------- #
-hydra-core==1.3.2
+hydra-core==1.3.4
 hydra-colorlog==1.2.0
 
 # --------- others --------- #
