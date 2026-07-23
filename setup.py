@@ -11,7 +11,7 @@ setup(
     url="https://github.com/user/project",
     install_requires=[
         "hydra-core",
-        "numpy<2",
+        "numpy<3",
         "openai",
         "pandas",
         "scikit-learn",
