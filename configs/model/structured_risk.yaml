@@ -10,6 +10,10 @@ representation_batch_size: 256
 checkpoint: null
 seed: 42
 no_final_layer_norm: false
+target_orientation: "original"
+strict_pre_target: false
+fit_standardizer_on_train_only: false
+normalize_supervised_by_weight_sum: false
 
 graph_risk_hidden_sizes: ""
 graph_recovery_hidden_sizes: "256"
@@ -20,12 +24,21 @@ dcrnn_bidirectional: false
 component_scale_mode: "learnable"
 component_scale_init: 0.01
 rd_fusion_gate_init: 0.1
+ode_steps: 4
+ode_step_size: 0.25
+grand_heads: 4
+grand_attention_dim: 16
+gread_reaction: "bs"
+gread_use_soft_adjacency: true
+prospective_embedding_dim: 768
 propagation_dt: 1.0
 alpha_init: 0.1
 beta_init: 0.1
 gamma_init: 0.1
 eta_init: 0.1
 recovery_eps: 1e-6
+diffusion_beta_transform: "softplus"
+diffusion_operator: "legacy_row_sum"
 diffusion_mode: "deviation"
 initial_state_mode: "igpc"
 enable_graph_diffusion: true
@@ -42,6 +55,12 @@ align_temperature: 0.07
 align_dim: 64
 align_hidden_sizes: ""
 align_dropout: 0.3
+alignment_mode: "single"
+consensus_gamma: 0.0
+consensus_hypothesis_limit: null
+alignment_norm_eps: 1e-8
+negative_time_radius: 0
+negative_graph_radius: 0
 llm_forecast_csv: "${paths.root_dir}/outputs/llm_event_tone/prompt_optimization/final/forecast_events.csv"
 llm_embedding_npz: "${paths.root_dir}/outputs/llm_event_tone/prompt_optimization/final/forecast_event_embeddings.npz"
 

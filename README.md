@@ -19,7 +19,7 @@ pip install -r requirements.txt
 Run the best known structured-risk experiment:
 
 ```bash
-python src/train.py experiment=structured_pipeline_8703
+python src/train.py experiment=legacy/structured_pipeline_8703
 ```
 
 Run a lightweight dry-run that validates inputs without loading the transformer
@@ -56,6 +56,6 @@ python src/eval.py output_dir=outputs/structured_pipeline_8703_align005_small_re
 - `src/scnews_sentiment/tuning/structured_pipeline_tuner.py`: staged hyperparameter tuning.
 - `configs/data/scnews_structured.yaml`: source CSV paths and schema.
 - `configs/model/structured_risk.yaml`: encoder, graph, alignment, and scorer settings.
-- `configs/experiment/structured_pipeline_8703.yaml`: tuned configuration corresponding to the best command supplied before the refactor.
+- `configs/experiment/legacy/structured_pipeline_8703.yaml`: tuned configuration corresponding to the best command supplied before the refactor.
 
 Additional operational details are in `SCNEWS_REFACTOR.md`.

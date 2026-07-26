@@ -72,6 +72,93 @@ def test_rd_fusion_gate_init_sets_constant_initial_probability() -> None:
     )
 
 
+def test_grand_t_and_gread_t_forward_are_finite() -> None:
+    import pytest
+
+    np = pytest.importorskip("numpy")
+    torch = pytest.importorskip("torch")
+    from src.scnews_sentiment.structured.propagation_models import (
+        GRANDTPropagationNetwork,
+        GREADTPropagationNetwork,
+    )
+
+    adjacency = np.asarray(
+        [[1.0, 1.0, 0.0], [1.0, 1.0, 1.0], [0.0, 1.0, 1.0]],
+        dtype=np.float32,
+    )
+    common = {
+        "node_igpc": np.ones(3, dtype=np.float32),
+        "normalized_adjacency": adjacency,
+        "risk_dim": 5,
+        "state_dim": 8,
+        "risk_hidden_sizes": (),
+        "dropout": 0.0,
+        "initial_state_mode": "fixed_zero",
+        "ode_steps": 2,
+        "ode_step_size": 0.25,
+    }
+    grand = GRANDTPropagationNetwork(
+        **common,
+        heads=2,
+        attention_dim=4,
+    )
+    gread = GREADTPropagationNetwork(
+        **common,
+        reaction="bs",
+        use_soft_adjacency=True,
+        alpha_init=0.1,
+        beta_init=0.1,
+    )
+    inputs = torch.randn(4, 3, 5)
+    mask = torch.ones(4, 3, 1)
+
+    grand_states = grand(inputs, mask)
+    gread_states = gread(inputs, mask)
+
+    assert grand_states.shape == (4, 3, 8)
+    assert gread_states.shape == (4, 3, 8)
+    assert torch.isfinite(grand_states).all()
+    assert torch.isfinite(gread_states).all()
+    grand_states.square().mean().backward()
+    assert all(
+        parameter.grad is None or torch.isfinite(parameter.grad).all()
+        for parameter in grand.parameters()
+    )
+    assert torch.allclose(
+        grand.attention_matrix(grand_states[-1]).sum(dim=1),
+        torch.ones(3),
+        atol=1e-6,
+    )
+
+
+def test_prospective_mlp_uses_embedding_presence_mask() -> None:
+    import pytest
+
+    np = pytest.importorskip("numpy")
+    torch = pytest.importorskip("torch")
+    from src.scnews_sentiment.structured.propagation_models import (
+        ProspectiveMLPPropagationNetwork,
+        is_prospective_semantic_model,
+    )
+
+    model = ProspectiveMLPPropagationNetwork(
+        normalized_adjacency=np.eye(3, dtype=np.float32),
+        risk_dim=6,
+        state_dim=4,
+        dropout=0.0,
+    )
+    embeddings = torch.randn(2, 3, 6)
+    mask = torch.tensor(
+        [[[1.0], [0.0], [1.0]], [[0.0], [1.0], [1.0]]]
+    )
+    states = model(embeddings, mask)
+
+    assert is_prospective_semantic_model("prospective_mlp")
+    assert states.shape == (2, 3, 4)
+    assert torch.isfinite(states).all()
+    assert torch.count_nonzero(model.normalized_adjacency) == 0
+
+
 def test_repeated_cv_summary_aggregates_repeat_level_values() -> None:
     import pytest
 

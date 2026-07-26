@@ -17,10 +17,20 @@ from src.scnews_sentiment.structured.models import (
 
 
 LABEL_HISTORY_PROPAGATION_MODELS = {"itransformer", "timesnet"}
+NAIVE_LABEL_HISTORY_MODELS = {"persistence", "historical_mean"}
+PROSPECTIVE_SEMANTIC_MODELS = {"prospective_mlp"}
 
 
 def is_label_history_propagation_model(model_name: Any) -> bool:
     return str(model_name).lower() in LABEL_HISTORY_PROPAGATION_MODELS
+
+
+def is_naive_label_history_model(model_name: Any) -> bool:
+    return str(model_name).lower() in NAIVE_LABEL_HISTORY_MODELS
+
+
+def is_prospective_semantic_model(model_name: Any) -> bool:
+    return str(model_name).lower() in PROSPECTIVE_SEMANTIC_MODELS
 
 
 def _row_normalize(matrix: np.ndarray) -> np.ndarray:
@@ -839,6 +849,328 @@ class LSTMPropagationNetwork(nn.Module):
         return h
 
 
+class GRANDTPropagationNetwork(nn.Module):
+    """Temporal adaptation of GRAND's nonlinear graph neural diffusion ODE.
+
+    Each event representation is injected into the persistent node state, after
+    which ``dH/dt = (A(H) - I)H`` is integrated with fixed-step RK4. ``A(H)`` is
+    the paper's graph-masked, multi-head scaled dot-product attention matrix.
+    """
+
+    def __init__(
+        self,
+        *,
+        node_igpc: np.ndarray,
+        normalized_adjacency: np.ndarray,
+        risk_dim: int,
+        state_dim: int,
+        risk_hidden_sizes: Sequence[int],
+        dropout: float,
+        initial_state_mode: str,
+        ode_steps: int,
+        ode_step_size: float,
+        heads: int,
+        attention_dim: int,
+        **_: Any,
+    ) -> None:
+        super().__init__()
+        if ode_steps <= 0 or ode_step_size <= 0:
+            raise ValueError("GRAND-T ODE steps and step size must be positive.")
+        if heads <= 0 or attention_dim <= 0:
+            raise ValueError("GRAND-T attention dimensions must be positive.")
+
+        fixed_adjacency = _row_normalize(normalized_adjacency)
+        edge_mask = np.asarray(normalized_adjacency) > 0
+        np.fill_diagonal(edge_mask, True)
+        self.register_buffer(
+            "normalized_adjacency",
+            torch.tensor(fixed_adjacency, dtype=torch.float32),
+        )
+        self.register_buffer("edge_mask", torch.tensor(edge_mask, dtype=torch.bool))
+        self.initial_state = NodeInitialState(
+            node_igpc,
+            state_dim,
+            mode=initial_state_mode,
+            activation="none",
+        )
+        self.risk_projector = make_mlp(
+            input_dim=risk_dim,
+            hidden_sizes=risk_hidden_sizes,
+            output_dim=state_dim,
+            dropout=dropout,
+            final_layer_norm=False,
+        )
+        self.key = nn.Linear(state_dim, heads * attention_dim, bias=False)
+        self.query = nn.Linear(state_dim, heads * attention_dim, bias=False)
+        self.heads = int(heads)
+        self.attention_dim = int(attention_dim)
+        self.ode_steps = int(ode_steps)
+        self.ode_step_size = float(ode_step_size)
+        self.input_dropout = nn.Dropout(dropout)
+
+    def attention_matrix(self, h: Any) -> Any:
+        node_count = h.shape[0]
+        keys = self.key(h).reshape(node_count, self.heads, self.attention_dim)
+        queries = self.query(h).reshape(
+            node_count, self.heads, self.attention_dim
+        )
+        scores = torch.einsum("ihd,jhd->hij", keys, queries)
+        scores = scores / float(self.attention_dim) ** 0.5
+        scores = scores.masked_fill(~self.edge_mask.unsqueeze(0), float("-inf"))
+        return torch.softmax(scores, dim=-1).mean(dim=0)
+
+    def vector_field(self, h: Any) -> Any:
+        attention = self.attention_matrix(h)
+        return attention @ h - h
+
+    def _rk4_step(self, h: Any) -> Any:
+        dt = self.ode_step_size
+        k1 = self.vector_field(h)
+        k2 = self.vector_field(h + 0.5 * dt * k1)
+        k3 = self.vector_field(h + 0.5 * dt * k2)
+        k4 = self.vector_field(h + dt * k3)
+        return h + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+    def forward(
+        self,
+        node_risk_sequence: Any,
+        node_risk_mask: Optional[Any] = None,
+        initial_state: Optional[Any] = None,
+        return_sequence: bool = True,
+    ) -> Any:
+        if node_risk_sequence.dim() == 2:
+            node_risk_sequence = node_risk_sequence.unsqueeze(0)
+        if node_risk_mask is not None and node_risk_mask.dim() == 2:
+            node_risk_mask = node_risk_mask.unsqueeze(0)
+
+        h = self.initial_state() if initial_state is None else initial_state
+        states: List[Any] = []
+        for time_index in range(node_risk_sequence.shape[0]):
+            z = self.risk_projector(node_risk_sequence[time_index])
+            if node_risk_mask is not None:
+                z = z * node_risk_mask[time_index]
+            h = h + self.input_dropout(z)
+            for _ in range(self.ode_steps):
+                if self.training and h.requires_grad:
+                    from torch.utils.checkpoint import checkpoint
+
+                    h = checkpoint(self._rk4_step, h, use_reentrant=False)
+                else:
+                    h = self._rk4_step(h)
+            states.append(h)
+
+        if return_sequence:
+            return torch.stack(states, dim=0)
+        return h
+
+
+class GREADTPropagationNetwork(nn.Module):
+    """Temporal adaptation of GREAD's graph reaction-diffusion ODE."""
+
+    VALID_REACTIONS = {
+        "bs",
+        "fisher",
+        "allen_cahn",
+        "zeldovich",
+        "source",
+        "filter_bank",
+        "filter_bank_star",
+    }
+
+    def __init__(
+        self,
+        *,
+        node_igpc: np.ndarray,
+        normalized_adjacency: np.ndarray,
+        risk_dim: int,
+        state_dim: int,
+        risk_hidden_sizes: Sequence[int],
+        dropout: float,
+        initial_state_mode: str,
+        ode_steps: int,
+        ode_step_size: float,
+        reaction: str,
+        use_soft_adjacency: bool,
+        alpha_init: float,
+        beta_init: float,
+        **_: Any,
+    ) -> None:
+        super().__init__()
+        if reaction not in self.VALID_REACTIONS:
+            raise ValueError(
+                f"GREAD reaction must be one of {sorted(self.VALID_REACTIONS)}."
+            )
+        if ode_steps <= 0 or ode_step_size <= 0:
+            raise ValueError("GREAD-T ODE steps and step size must be positive.")
+        if alpha_init <= 0 or beta_init <= 0:
+            raise ValueError("GREAD-T alpha and beta must be positive.")
+
+        fixed_adjacency = _row_normalize(normalized_adjacency)
+        edge_mask = np.asarray(normalized_adjacency) > 0
+        np.fill_diagonal(edge_mask, True)
+        self.register_buffer(
+            "normalized_adjacency",
+            torch.tensor(fixed_adjacency, dtype=torch.float32),
+        )
+        self.register_buffer("edge_mask", torch.tensor(edge_mask, dtype=torch.bool))
+        self.initial_state = NodeInitialState(
+            node_igpc,
+            state_dim,
+            mode=initial_state_mode,
+            activation="none",
+        )
+        self.risk_projector = make_mlp(
+            input_dim=risk_dim,
+            hidden_sizes=risk_hidden_sizes,
+            output_dim=state_dim,
+            dropout=dropout,
+            final_layer_norm=False,
+        )
+        self.raw_alpha = nn.Parameter(
+            torch.full(
+                (state_dim,),
+                softplus_inverse(alpha_init),
+                dtype=torch.float32,
+            )
+        )
+        self.raw_beta = nn.Parameter(
+            torch.full(
+                (state_dim,),
+                softplus_inverse(beta_init),
+                dtype=torch.float32,
+            )
+        )
+        self.reaction = reaction
+        self.use_soft_adjacency = bool(use_soft_adjacency)
+        self.ode_steps = int(ode_steps)
+        self.ode_step_size = float(ode_step_size)
+        self.input_dropout = nn.Dropout(dropout)
+
+    def attention_matrix(self, h: Any) -> Any:
+        if not self.use_soft_adjacency:
+            return self.normalized_adjacency
+        scores = (h @ h.transpose(0, 1)) / float(h.shape[1])
+        scores = scores.masked_fill(~self.edge_mask, float("-inf"))
+        return torch.softmax(scores, dim=-1)
+
+    def reaction_term(self, h: Any, adjacency: Any, source: Any) -> Any:
+        if self.reaction == "fisher":
+            return h * (1.0 - h)
+        if self.reaction == "allen_cahn":
+            return h * (1.0 - h.square())
+        if self.reaction == "zeldovich":
+            return h * (h - h.square())
+        if self.reaction == "source":
+            return source
+
+        laplacian_h = h - adjacency @ h
+        if self.reaction == "filter_bank":
+            return laplacian_h
+        if self.reaction == "filter_bank_star":
+            return laplacian_h + h
+        # Blurring-sharpening reaction: (A - A^2)H.
+        neighbor_h = adjacency @ h
+        return neighbor_h - adjacency @ neighbor_h
+
+    def vector_field(self, h: Any, source: Any) -> Any:
+        adjacency = self.attention_matrix(h)
+        laplacian_h = h - adjacency @ h
+        alpha = F.softplus(self.raw_alpha)
+        beta = F.softplus(self.raw_beta)
+        return -alpha * laplacian_h + beta * self.reaction_term(
+            h, adjacency, source
+        )
+
+    def _rk4_step(self, h: Any, source: Any) -> Any:
+        dt = self.ode_step_size
+        k1 = self.vector_field(h, source)
+        k2 = self.vector_field(h + 0.5 * dt * k1, source)
+        k3 = self.vector_field(h + 0.5 * dt * k2, source)
+        k4 = self.vector_field(h + dt * k3, source)
+        return h + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+    def forward(
+        self,
+        node_risk_sequence: Any,
+        node_risk_mask: Optional[Any] = None,
+        initial_state: Optional[Any] = None,
+        return_sequence: bool = True,
+    ) -> Any:
+        if node_risk_sequence.dim() == 2:
+            node_risk_sequence = node_risk_sequence.unsqueeze(0)
+        if node_risk_mask is not None and node_risk_mask.dim() == 2:
+            node_risk_mask = node_risk_mask.unsqueeze(0)
+
+        h = self.initial_state() if initial_state is None else initial_state
+        states: List[Any] = []
+        for time_index in range(node_risk_sequence.shape[0]):
+            z = self.risk_projector(node_risk_sequence[time_index])
+            if node_risk_mask is not None:
+                z = z * node_risk_mask[time_index]
+            h = h + self.input_dropout(z)
+            source = h
+            for _ in range(self.ode_steps):
+                h = self._rk4_step(h, source)
+            states.append(h)
+
+        if return_sequence:
+            return torch.stack(states, dim=0)
+        return h
+
+
+class ProspectiveMLPPropagationNetwork(nn.Module):
+    """Target-aligned MLP over frozen Prospective-LLM hypothesis embeddings."""
+
+    uses_target_aligned_inputs = True
+
+    def __init__(
+        self,
+        *,
+        normalized_adjacency: np.ndarray,
+        risk_dim: int,
+        state_dim: int,
+        dropout: float,
+        **_: Any,
+    ) -> None:
+        super().__init__()
+        node_count = np.asarray(normalized_adjacency).shape[0]
+        self.register_buffer(
+            "normalized_adjacency",
+            torch.zeros((node_count, node_count), dtype=torch.float32),
+        )
+        self.encoder = nn.Sequential(
+            nn.Linear(risk_dim + 1, state_dim),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(state_dim, state_dim),
+            nn.LayerNorm(state_dim),
+        )
+
+    def forward(
+        self,
+        node_risk_sequence: Any,
+        node_risk_mask: Optional[Any] = None,
+        initial_state: Optional[Any] = None,
+        return_sequence: bool = True,
+    ) -> Any:
+        del initial_state
+        if node_risk_sequence.dim() == 2:
+            node_risk_sequence = node_risk_sequence.unsqueeze(0)
+        if node_risk_mask is None:
+            node_risk_mask = node_risk_sequence.new_ones(
+                (*node_risk_sequence.shape[:-1], 1)
+            )
+        elif node_risk_mask.dim() == 2:
+            node_risk_mask = node_risk_mask.unsqueeze(0)
+        mask = node_risk_mask.to(dtype=node_risk_sequence.dtype)
+        states = self.encoder(
+            torch.cat([node_risk_sequence * mask, mask], dim=-1)
+        )
+        if return_sequence:
+            return states
+        return states[-1]
+
+
 class _GatedReactionDiffusionBase(nn.Module):
     def __init__(
         self,
@@ -861,6 +1193,8 @@ class _GatedReactionDiffusionBase(nn.Module):
         enable_graph_diffusion: bool,
         enable_two_hop_diffusion: bool,
         enable_recovery: bool,
+        diffusion_beta_transform: str = "softplus",
+        diffusion_operator: str = "legacy_row_sum",
     ) -> None:
         super().__init__()
         valid_diffusion_modes = {"deviation", "direct"}
@@ -868,6 +1202,15 @@ class _GatedReactionDiffusionBase(nn.Module):
             raise ValueError(
                 "diffusion_mode must be one of "
                 f"{sorted(valid_diffusion_modes)}, got {diffusion_mode!r}."
+            )
+        if diffusion_beta_transform not in {"softplus", "sigmoid"}:
+            raise ValueError(
+                "diffusion_beta_transform must be 'softplus' or 'sigmoid'."
+            )
+        if diffusion_operator not in {"legacy_row_sum", "normalized_laplacian"}:
+            raise ValueError(
+                "diffusion_operator must be 'legacy_row_sum' or "
+                "'normalized_laplacian'."
             )
 
         self.register_buffer(
@@ -897,9 +1240,13 @@ class _GatedReactionDiffusionBase(nn.Module):
         self.raw_alpha = nn.Parameter(
             torch.tensor(softplus_inverse(alpha_init), dtype=torch.float32)
         )
-        self.raw_beta = nn.Parameter(
-            torch.tensor(softplus_inverse(beta_init), dtype=torch.float32)
-        )
+        if diffusion_beta_transform == "sigmoid":
+            if not (0.0 < beta_init < 1.0):
+                raise ValueError("beta_init must be in (0, 1) for sigmoid beta.")
+            raw_beta_init = float(np.log(beta_init / (1.0 - beta_init)))
+        else:
+            raw_beta_init = softplus_inverse(beta_init)
+        self.raw_beta = nn.Parameter(torch.tensor(raw_beta_init, dtype=torch.float32))
         self.raw_gamma = nn.Parameter(
             torch.tensor(softplus_inverse(gamma_init), dtype=torch.float32)
         )
@@ -909,21 +1256,30 @@ class _GatedReactionDiffusionBase(nn.Module):
         self.dt = float(dt)
         self.eps = float(eps)
         self.diffusion_mode = diffusion_mode
+        self.diffusion_beta_transform = diffusion_beta_transform
+        self.diffusion_operator_mode = diffusion_operator
         self.enable_graph_diffusion = bool(enable_graph_diffusion)
         self.enable_two_hop_diffusion = bool(enable_two_hop_diffusion)
         self.enable_recovery = bool(enable_recovery)
         self.dropout = nn.Dropout(dropout)
 
     def positive_scalars(self) -> Tuple[Any, Any, Any, Any]:
+        beta = (
+            torch.sigmoid(self.raw_beta)
+            if self.diffusion_beta_transform == "sigmoid"
+            else F.softplus(self.raw_beta)
+        )
         return (
             F.softplus(self.raw_alpha),
-            F.softplus(self.raw_beta),
+            beta,
             F.softplus(self.raw_gamma),
             F.softplus(self.raw_eta),
         )
 
     def diffusion_operator(self, values: Any) -> Any:
         neighbor_values = self.normalized_adjacency @ values
+        if self.diffusion_operator_mode == "normalized_laplacian":
+            return neighbor_values - values
         row_weight = self.normalized_adjacency.sum(dim=1, keepdim=True)
         return neighbor_values - row_weight * values
 
@@ -1385,11 +1741,31 @@ class TimesNetPropagationModule(_PropagationWrapper):
         super().__init__(TimesNetPropagationNetwork(**kwargs))
 
 
+class GRANDTPropagationModule(_PropagationWrapper):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(GRANDTPropagationNetwork(**kwargs))
+
+
+class GREADTPropagationModule(_PropagationWrapper):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(GREADTPropagationNetwork(**kwargs))
+
+
+class ProspectiveMLPPropagationModule(_PropagationWrapper):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(ProspectiveMLPPropagationNetwork(**kwargs))
+
+
 def build_propagation_module(args: Any, data: Any) -> Any:
     model_name = str(getattr(args, "propagation_model", "reaction_diffusion")).lower()
     node_igpc = data.graph.node_metadata["igpc_value"].to_numpy(dtype=np.float32)
     risk_hidden_sizes = parse_hidden_sizes(args.graph_risk_hidden_sizes)
-    risk_dim = 2 if is_label_history_propagation_model(model_name) else args.representation_dim
+    if is_label_history_propagation_model(model_name):
+        risk_dim = 2
+    elif is_prospective_semantic_model(model_name):
+        risk_dim = args.prospective_embedding_dim
+    else:
+        risk_dim = args.representation_dim
 
     if model_name == "reaction_diffusion":
         return IndustryGraphPropagationModule(
@@ -1444,6 +1820,26 @@ def build_propagation_module(args: Any, data: Any) -> Any:
             lookback=args.ts_baseline_lookback,
             kernel_sizes=_parse_kernel_sizes(args.timesnet_kernel_sizes),
         )
+    if model_name == "grand_t":
+        return GRANDTPropagationModule(
+            **common_kwargs,
+            ode_steps=args.ode_steps,
+            ode_step_size=args.ode_step_size,
+            heads=args.grand_heads,
+            attention_dim=args.grand_attention_dim,
+        )
+    if model_name == "gread_t":
+        return GREADTPropagationModule(
+            **common_kwargs,
+            ode_steps=args.ode_steps,
+            ode_step_size=args.ode_step_size,
+            reaction=args.gread_reaction,
+            use_soft_adjacency=args.gread_use_soft_adjacency,
+            alpha_init=args.alpha_init,
+            beta_init=args.beta_init,
+        )
+    if model_name == "prospective_mlp":
+        return ProspectiveMLPPropagationModule(**common_kwargs)
     if model_name == "gcn":
         return GCNPropagationModule(**common_kwargs)
     if model_name == "gat":
@@ -1483,6 +1879,8 @@ def build_propagation_module(args: Any, data: Any) -> Any:
             "enable_graph_diffusion": args.enable_graph_diffusion,
             "enable_two_hop_diffusion": args.enable_two_hop_diffusion,
             "enable_recovery": args.enable_recovery,
+            "diffusion_beta_transform": args.diffusion_beta_transform,
+            "diffusion_operator": args.diffusion_operator,
         }
         if model_name == "gru_gated_reaction_diffusion":
             return GRUGatedReactionDiffusionPropagationModule(**gated_kwargs)
@@ -1508,7 +1906,8 @@ def build_propagation_module(args: Any, data: Any) -> Any:
     raise ValueError(
         "propagation_model must be one of "
         "'reaction_diffusion', 'gcn', 'gat', 'dcrnn', 'agcrn', 'lstm', "
-        "'stgcn', 'itransformer', 'timesnet', "
+        "'stgcn', 'itransformer', 'timesnet', 'grand_t', 'gread_t', "
+        "'prospective_mlp', "
         "'gru_gated_reaction_diffusion', 'lstm_gated_reaction_diffusion', "
         "'gru_z_gated_reaction_diffusion', "
         "'lstm_z_gated_reaction_diffusion', or "

@@ -1,0 +1,11 @@
+{
+  "from_version": 0,
+  "to_version": 1,
+  "diagnosis": "Generated descriptions frequently predict dramatic escalations (court rulings, nationalizations, arbitration) that do not match the more incremental or divergent true next news, indicating a tendency to overestimate conflict severity and invent specific outcomes while ignoring shifts in topic or tone.",
+  "raw_agent_text": "{\n  \"diagnosis\": \"Generated descriptions frequently predict dramatic escalations (court rulings, nationalizations, arbitration) that do not match the more incremental or divergent true next news, indicating a tendency to overestimate conflict severity and invent specific outcomes while ignoring shifts in topic or tone.\",\n  \"guidance_bullets\": [\n    \"Avoid predicting specific court rulings, arbitration filings, or nationalization decisions unless directly confirmed by the historical trajectory; instead describe the range of possible outcomes or the ongoing uncertainty.\",\n    \"Ensure the tone of the generated description aligns with the factual developments in the most recent news (e.g., diplomatic back-and-forth, mixed signals) rather than assuming a decisive resolution.\",\n    \"Do not invent dates or precise sequences of events; use conditional language or describe the current state of negotiations.\"\n  ]\n}",
+  "suggestions": [
+    "Avoid predicting specific court rulings, arbitration filings, or nationalization decisions unless directly confirmed by the historical trajectory; instead describe the range of possible outcomes or the ongoing uncertainty.",
+    "Ensure the tone of the generated description aligns with the factual developments in the most recent news (e.g., diplomatic back-and-forth, mixed signals) rather than assuming a decisive resolution.",
+    "Do not invent dates or precise sequences of events; use conditional language or describe the current state of negotiations."
+  ]
+}

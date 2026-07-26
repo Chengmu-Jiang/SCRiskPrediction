@@ -1,0 +1,11 @@
+﻿repeat,seed,split,metric,value,fold_count,fold_std,fold_min,fold_max,repeat_output_dir
+0,42,val,mse,9.798221628197425,5,2.191189647517207,7.466960575983486,12.99160699232566,C:\00-学海无涯\我的工作\SCRiskPrediction\outputs\strict_rerun\tuning\20b_lambda0005\repeat_00
+0,42,val,rmse,3.1150154054826418,5,0.3444209847759629,2.732573983624869,3.604387186794124,C:\00-学海无涯\我的工作\SCRiskPrediction\outputs\strict_rerun\tuning\20b_lambda0005\repeat_00
+0,42,val,mae,2.4242653285425444,5,0.2654317626041627,2.181733826032052,2.752727043628693,C:\00-学海无涯\我的工作\SCRiskPrediction\outputs\strict_rerun\tuning\20b_lambda0005\repeat_00
+0,42,val,r2,0.2021519535949177,5,0.1575284025787836,0.0417415425799571,0.4237366044823299,C:\00-学海无涯\我的工作\SCRiskPrediction\outputs\strict_rerun\tuning\20b_lambda0005\repeat_00
+0,42,val,pearson,0.4807601304852941,5,0.1632534777671078,0.3180374103487434,0.7107996110173616,C:\00-学海无涯\我的工作\SCRiskPrediction\outputs\strict_rerun\tuning\20b_lambda0005\repeat_00
+0,42,val,spearman,0.4628471528471529,5,0.2329390853943875,0.1928571428571428,0.7622377622377624,C:\00-学海无涯\我的工作\SCRiskPrediction\outputs\strict_rerun\tuning\20b_lambda0005\repeat_00
+0,42,val,median_ae,1.993033802509308,5,0.2245808458198699,1.7583355903625488,2.365832090377808,C:\00-学海无涯\我的工作\SCRiskPrediction\outputs\strict_rerun\tuning\20b_lambda0005\repeat_00
+0,42,val,p90_ae,4.29415146112442,5,0.7394545340171502,3.4855770111083983,5.400599670410156,C:\00-学海无涯\我的工作\SCRiskPrediction\outputs\strict_rerun\tuning\20b_lambda0005\repeat_00
+0,42,val,max_ae,7.632384824752807,5,1.5158328034931174,6.257672786712647,9.990782737731934,C:\00-学海无涯\我的工作\SCRiskPrediction\outputs\strict_rerun\tuning\20b_lambda0005\repeat_00
+0,42,val,bias,-0.4013104904118257,5,0.4152449373774483,-1.0149693774680295,0.0565286393348987,C:\00-学海无涯\我的工作\SCRiskPrediction\outputs\strict_rerun\tuning\20b_lambda0005\repeat_00

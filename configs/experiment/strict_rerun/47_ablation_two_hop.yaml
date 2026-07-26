@@ -1,0 +1,7 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_final
+  - _self_
+output_dir: "${paths.root_dir}/outputs/strict_rerun/ablations/two_hop"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/ablations/two_hop"
+enable_two_hop_diffusion: true

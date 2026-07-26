@@ -61,6 +61,12 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     )
     parser.add_argument("--win", type=int, default=5)
     parser.add_argument(
+        "--num-hypotheses",
+        type=int,
+        default=1,
+        help="Number of independent prospective event decodes generated per target sample.",
+    )
+    parser.add_argument(
         "--split-strategy",
         choices=["per-topic", "global", "time-series"],
         default="per-topic",
@@ -197,6 +203,10 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 
     args = parser.parse_args(argv)
     args = coerce_config_arg_types(args)
+    if args.num_hypotheses <= 0:
+        raise ValueError("--num-hypotheses must be positive.")
+    if not (0.0 < args.top_p <= 1.0):
+        raise ValueError("--top-p must be in (0, 1].")
     if args.win < 1:
         raise ValueError("--win must be >= 1.")
     if args.train_ratio <= 0 or args.val_ratio < 0 or args.train_ratio + args.val_ratio >= 1:
@@ -265,3 +275,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 def main(argv: Optional[Sequence[str]] = None) -> None:
     args = parse_args(argv)
     run_event_tone_pipeline(args)
+
+
+if __name__ == "__main__":
+    main()

@@ -15,6 +15,44 @@ from src.scnews_sentiment.structured.data import *
 from src.scnews_sentiment.structured.models import *
 from src.scnews_sentiment.structured.training_utils import *
 
+
+def _build_prospective_semantic_sequence(
+    alignment_batch: AlignmentBatch,
+    *,
+    time_count: int,
+    node_count: int,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Scatter target-aligned prospective embeddings to a dense time-node tensor."""
+    embeddings = np.asarray(alignment_batch.semantic_embeddings, dtype=np.float32)
+    if embeddings.ndim != 2 or embeddings.shape[0] != len(alignment_batch.time_index):
+        raise ValueError("Prospective embeddings and pair indices have incompatible shapes.")
+
+    sequence = np.zeros(
+        (time_count, node_count, embeddings.shape[1]),
+        dtype=np.float32,
+    )
+    counts = np.zeros((time_count, node_count, 1), dtype=np.float32)
+    for embedding, time_index, node_index in zip(
+        embeddings,
+        alignment_batch.time_index,
+        alignment_batch.node_index,
+    ):
+        time_index = int(time_index)
+        node_index = int(node_index)
+        if not (0 <= time_index < time_count and 0 <= node_index < node_count):
+            raise ValueError("Prospective pair index falls outside the time-node grid.")
+        sequence[time_index, node_index] += embedding
+        counts[time_index, node_index, 0] += 1.0
+
+    sequence = np.divide(
+        sequence,
+        np.maximum(counts, 1.0),
+        out=np.zeros_like(sequence),
+        where=counts > 0,
+    )
+    return sequence, (counts > 0).astype(np.float32)
+
+
 def run_graph_propagation(
     batch: RepresentationBatch,
     args: argparse.Namespace,
@@ -446,7 +484,10 @@ def train_supervised_structured_model_repeated_time_series(args: argparse.Namesp
         "component_scale_init": args.component_scale_init,
         "rd_fusion_gate_init": args.rd_fusion_gate_init,
         "initial_state_mode": args.initial_state_mode,
-        "final_aggregation": "all-fold",
+        "final_aggregation": (
+            "final-fold-only" if bool(getattr(args, "evaluate_test", True))
+            else "validation-only"
+        ),
         "aggregate_metrics": json.loads(
             repeated_aggregate.to_json(orient="records", double_precision=15)
         ),
@@ -502,6 +543,9 @@ def train_supervised_structured_model_time_series(args: argparse.Namespace) -> N
         fold_args.split_strategy = "fixed"
         # 计算并保存 split_override_masks，供当前分支后续使用。
         fold_args.split_override_masks = masks
+        fold_args.evaluate_test = bool(getattr(args, "evaluate_test", True)) and (
+            fold_index == len(fold_masks) - 1
+        )
         # 判断 args.tensorboard_log_dir is not None，处理对应情况。
         if args.tensorboard_log_dir is not None:
             # 计算并保存 tensorboard_log_dir，供当前分支后续使用。
@@ -512,7 +556,8 @@ def train_supervised_structured_model_time_series(args: argparse.Namespace) -> N
             f"[tscv] fold={fold_index} "
             f"train={int(masks['train'].sum())} "
             f"val={int(masks['val'].sum())} "
-            f"test={int(masks['test'].sum())}"
+            f"test={int(masks['test'].sum())} "
+            f"evaluate_test={fold_args.evaluate_test}"
         )
         # 执行 train_supervised_structured_model，完成当前步骤的副作用。
         train_supervised_structured_model(fold_args)
@@ -575,6 +620,15 @@ def train_supervised_structured_model_time_series(args: argparse.Namespace) -> N
 
     # 计算并保存 summary，供后续逻辑复用。
     summary = pd.DataFrame(summary_rows)
+    if not bool(getattr(args, "evaluate_test", True)):
+        summary = summary.drop(
+            columns=[
+                column
+                for column in summary.columns
+                if str(column).startswith("test_")
+            ],
+            errors="ignore",
+        )
     # 计算并保存 aggregate_metrics，供后续逻辑复用。
     aggregate_metrics = summarize_time_series_cv_metrics(summary)
     # 计算并保存 aggregate_frame，供后续逻辑复用。
@@ -611,6 +665,7 @@ def train_supervised_structured_model_time_series(args: argparse.Namespace) -> N
         "timesnet_kernel_sizes": getattr(args, "timesnet_kernel_sizes", None),
         "initial_state_mode": args.initial_state_mode,
         "uses_adaptive_graph": str(args.propagation_model).lower() == "agcrn",
+        "evaluate_test": bool(getattr(args, "evaluate_test", True)),
         "aggregate_metrics": aggregate_metrics,
         "folds": json.loads(summary.to_json(orient="records")),
     }
@@ -649,6 +704,95 @@ def _build_shifted_label_history_inputs(
     return node_risk_sequence, node_risk_mask
 
 
+def _build_naive_label_history_predictions(
+    labels: np.ndarray,
+    label_mask: np.ndarray,
+    mode: str,
+) -> np.ndarray:
+    """Build causal persistence or expanding historical-mean predictions."""
+    labels = np.asarray(labels, dtype=np.float32)
+    label_mask = np.asarray(label_mask, dtype=np.float32)
+    predictions = np.zeros_like(labels, dtype=np.float32)
+    last_values = np.zeros(labels.shape[1], dtype=np.float32)
+    running_sum = np.zeros(labels.shape[1], dtype=np.float64)
+    running_count = np.zeros(labels.shape[1], dtype=np.int64)
+
+    for time_index in range(labels.shape[0]):
+        if mode == "persistence":
+            predictions[time_index] = last_values
+        elif mode == "historical_mean":
+            predictions[time_index] = np.divide(
+                running_sum,
+                running_count,
+                out=np.zeros_like(running_sum),
+                where=running_count > 0,
+            ).astype(np.float32)
+        else:
+            raise ValueError(f"Unsupported naive label-history model: {mode}.")
+
+        observed = label_mask[time_index] > 0
+        last_values[observed] = labels[time_index, observed]
+        running_sum[observed] += labels[time_index, observed]
+        running_count[observed] += 1
+
+    return predictions
+
+
+def run_naive_label_history_baseline(args: argparse.Namespace) -> None:
+    """Evaluate a deterministic causal label-history baseline."""
+    mode = str(args.propagation_model).lower()
+    data = build_supervised_label_history_training_data(args)
+    ensure_dir(args.output_dir)
+    predictions = _build_naive_label_history_predictions(
+        data.label_values,
+        data.label_mask,
+        mode,
+    )
+    metrics: Dict[str, Any] = {
+        "best_epoch": 0,
+        "checkpoint_metric": None,
+        "best_checkpoint_metric_value": None,
+        "best_val_total_loss": None,
+        "best_val_supervised_loss": None,
+        "epochs_completed": 0,
+        "early_stopped": False,
+        "propagation_model": mode,
+        "baseline_input": "strictly_shifted_article_score_history",
+        "uses_supply_chain_graph": False,
+        "uses_adaptive_graph": False,
+        "evaluate_test": bool(getattr(args, "evaluate_test", True)),
+        "splits": {},
+    }
+    for split_name, split_mask in data.split_by_time.items():
+        if split_name == "test" and not bool(getattr(args, "evaluate_test", True)):
+            continue
+        metrics["splits"][split_name] = prediction_metrics(
+            predictions=predictions,
+            labels=data.label_values,
+            supervision_weights=data.supervision_weights,
+            time_mask=split_mask,
+        )
+
+    predictions_frame = build_training_predictions_frame(predictions, data)
+    if not bool(getattr(args, "evaluate_test", True)):
+        predictions_frame = predictions_frame[predictions_frame["split"] != "test"].copy()
+    predictions_frame.to_csv(
+        args.output_dir / "structured_supervised_predictions.csv",
+        index=False,
+        encoding="utf-8-sig",
+    )
+    data.time_metadata.to_csv(
+        args.output_dir / "structured_supervised_time_metadata.csv",
+        index=False,
+        encoding="utf-8-sig",
+    )
+    with (args.output_dir / "structured_supervised_metrics.json").open(
+        "w",
+        encoding="utf-8",
+    ) as handle:
+        json.dump(metrics, handle, indent=2, ensure_ascii=False)
+
+
 def train_label_history_baseline_model(args: argparse.Namespace) -> None:
     """Train iTransformer/TimesNet baselines on shifted ArticleScore history."""
     import copy
@@ -657,6 +801,7 @@ def train_label_history_baseline_model(args: argparse.Namespace) -> None:
     from src.scnews_sentiment.structured.propagation_models import (
         build_propagation_module,
         is_label_history_propagation_model,
+        is_prospective_semantic_model,
     )
 
     if args.align_weight > 0:
@@ -906,10 +1051,13 @@ def train_label_history_baseline_model(args: argparse.Namespace) -> None:
         "node_count": int(len(data.graph.node_codes)),
         "input_news_count": int(len(data.news_metadata)),
         "supervised_time_count": int((data.supervision_weights.sum(axis=1) > 0).sum()),
+        "evaluate_test": bool(getattr(args, "evaluate_test", True)),
         "splits": {},
         "history": history,
     }
     for split_name, split_mask in data.split_by_time.items():
+        if split_name == "test" and not bool(getattr(args, "evaluate_test", True)):
+            continue
         metrics["splits"][split_name] = prediction_metrics(
             predictions=final_predictions,
             labels=data.label_values,
@@ -919,6 +1067,8 @@ def train_label_history_baseline_model(args: argparse.Namespace) -> None:
     write_final_metrics_tensorboard(summary_writer, metrics)
 
     predictions_frame = build_training_predictions_frame(final_predictions, data)
+    if not bool(getattr(args, "evaluate_test", True)):
+        predictions_frame = predictions_frame[predictions_frame["split"] != "test"].copy()
     predictions_frame.to_csv(
         args.output_dir / "structured_supervised_predictions.csv",
         index=False,
@@ -998,6 +1148,7 @@ def train_supervised_structured_model(args: argparse.Namespace) -> None:
     from src.scnews_sentiment.structured.propagation_models import (
         build_propagation_module,
         is_label_history_propagation_model,
+        is_prospective_semantic_model,
     )
 
     # 构造端到端监督训练所需的数据对象
@@ -1014,11 +1165,22 @@ def train_supervised_structured_model(args: argparse.Namespace) -> None:
         return
 
     # 计算并保存 data，供后续逻辑复用。
+    from src.scnews_sentiment.structured.propagation_models import (
+        is_naive_label_history_model,
+    )
+    if is_naive_label_history_model(args.propagation_model):
+        run_naive_label_history_baseline(args)
+        return
     if is_label_history_propagation_model(args.propagation_model):
         train_label_history_baseline_model(args)
         return
 
     data = build_supervised_training_data(args)
+    prospective_baseline = is_prospective_semantic_model(args.propagation_model)
+    if not bool(getattr(args, "evaluate_test", True)):
+        test_mask = data.split_by_time.pop("test", None)
+        if test_mask is not None:
+            data.supervision_weights[np.asarray(test_mask, dtype=bool)] = 0.0
     # 解析训练或编码设备，并保存 device
     device = resolve_device(args.train_device)
     # 确保目标目录存在
@@ -1070,19 +1232,53 @@ def train_supervised_structured_model(args: argparse.Namespace) -> None:
     ).to(device)
 
     # 计算并保存 parameters，供后续逻辑复用。
-    alignment_batch = load_alignment_batch(args, data)
+    alignment_batch = load_alignment_batch(
+        args,
+        data,
+        force=prospective_baseline,
+    )
+    prospective_sequence: Optional[Any] = None
+    prospective_mask: Optional[Any] = None
+    if prospective_baseline:
+        if alignment_batch is None:
+            raise ValueError("Prospective-LLM + MLP requires cached LLM embeddings.")
+        prospective_array, prospective_mask_array = (
+            _build_prospective_semantic_sequence(
+                alignment_batch,
+                time_count=len(data.time_metadata),
+                node_count=len(data.graph.node_codes),
+            )
+        )
+        if prospective_array.shape[2] != int(args.prospective_embedding_dim):
+            raise ValueError(
+                "Cached Prospective-LLM embedding dimension "
+                f"{prospective_array.shape[2]} does not match "
+                f"--prospective-embedding-dim={args.prospective_embedding_dim}."
+            )
+        prospective_sequence = torch.tensor(
+            prospective_array,
+            dtype=torch.float32,
+            device=device,
+        )
+        prospective_mask = torch.tensor(
+            prospective_mask_array,
+            dtype=torch.float32,
+            device=device,
+        )
     # 初始化 align_semantic_tensor，明确后续步骤要累积的数据。
     align_semantic_tensor: Optional[Any] = None
     # 初始化 align_time_index，明确后续步骤要累积的数据。
     align_time_index: Optional[Any] = None
     # 初始化 align_node_index，明确后续步骤要累积的数据。
     align_node_index: Optional[Any] = None
+    align_pair_weights: Optional[Any] = None
+    align_candidate_mask: Optional[Any] = None
     # 初始化 semantic_projector，明确后续步骤要累积的数据。
     semantic_projector: Optional[Any] = None
     # 初始化 struct_projector，明确后续步骤要累积的数据。
     struct_projector: Optional[Any] = None
     # 判断 alignment_batch is not None，决定是否进入对应分支。
-    if alignment_batch is not None:
+    if alignment_batch is not None and args.align_weight > 0:
         # 计算并保存 align_semantic_tensor，供当前分支后续使用。
         align_semantic_tensor = torch.tensor(
             alignment_batch.semantic_embeddings,
@@ -1099,6 +1295,16 @@ def train_supervised_structured_model(args: argparse.Namespace) -> None:
         align_node_index = torch.tensor(
             alignment_batch.node_index,
             dtype=torch.long,
+            device=device,
+        )
+        align_pair_weights = torch.tensor(
+            alignment_batch.pair_weights,
+            dtype=torch.float32,
+            device=device,
+        )
+        align_candidate_mask = torch.tensor(
+            alignment_batch.candidate_mask,
+            dtype=torch.bool,
             device=device,
         )
         # 计算并保存 semantic_projector，供当前分支后续使用。
@@ -1119,7 +1325,11 @@ def train_supervised_structured_model(args: argparse.Namespace) -> None:
         ).to(device)
 
     # 计算并保存 parameters，供后续逻辑复用。
-    parameters = list(news_encoder.module.parameters())
+    parameters = (
+        []
+        if prospective_baseline
+        else list(news_encoder.module.parameters())
+    )
     # 调用 parameters.extend，执行当前步骤的副作用。
     parameters.extend(graph_module.module.parameters())
     # 调用 parameters.extend，执行当前步骤的副作用。
@@ -1159,17 +1369,43 @@ def train_supervised_structured_model(args: argparse.Namespace) -> None:
     # 定义内部辅助函数 forward_predictions，复用当前作用域中的变量。
     def forward_predictions() -> Tuple[Any, Any]:
         # 计算并保存 news_representations，供后续逻辑复用。
-        news_representations = news_encoder.module(gdelt_tensor, text_tensor)
+        if prospective_baseline:
+            if prospective_sequence is None or prospective_mask is None:
+                raise RuntimeError("Prospective semantic inputs were not initialized.")
+            node_risk_sequence = prospective_sequence
+            node_risk_mask = prospective_mask
+        else:
+            news_representations = news_encoder.module(gdelt_tensor, text_tensor)
         # 计算并保存 node_risk_sequence、node_risk_mask，供后续逻辑复用。
-        node_risk_sequence, node_risk_mask = aggregate_news_tensor_to_node_sequence(
-            news_representations=news_representations,
-            news_time_index=news_time_index,
-            news_node_index=news_node_index,
-            time_count=time_count,
-            node_count=node_count,
-        )
+            node_risk_sequence, node_risk_mask = aggregate_news_tensor_to_node_sequence(
+                news_representations=news_representations,
+                news_time_index=news_time_index,
+                news_node_index=news_node_index,
+                time_count=time_count,
+                node_count=node_count,
+            )
         # 计算并保存 propagated_states，供后续逻辑复用。
         propagated_states = graph_module.module(node_risk_sequence, node_risk_mask)
+        if bool(getattr(args, "strict_pre_target", False)) and not prospective_baseline:
+            propagation_module = graph_module.module
+            initial_state_fn = getattr(propagation_module, "initial_state", None)
+            initial_hidden_fn = getattr(propagation_module, "initial_hidden", None)
+            if callable(initial_state_fn):
+                initial_state = initial_state_fn()
+            elif callable(initial_hidden_fn):
+                # LSTM exposes its evaluator-facing hidden state separately
+                # from the cell state.
+                initial_state = initial_hidden_fn()
+            else:
+                # Feed-forward temporal baselines and zero-initialized
+                # recurrent baselines do not expose a learned initial state.
+                initial_state = propagated_states.new_zeros(
+                    propagated_states.shape[1:]
+                )
+            propagated_states = torch.cat(
+                [initial_state.unsqueeze(0), propagated_states[:-1]],
+                dim=0,
+            )
         # 计算并保存 predictions，供后续逻辑复用。
         predictions = evaluator.module(propagated_states).squeeze(-1)
         # 返回当前函数的处理结果。
@@ -1197,6 +1433,11 @@ def train_supervised_structured_model(args: argparse.Namespace) -> None:
             semantic_projector=semantic_projector,
             struct_projector=struct_projector,
             align_temperature=args.align_temperature,
+            align_pair_weights=align_pair_weights,
+            align_candidate_mask=align_candidate_mask,
+            normalize_supervised_by_weight_sum=(
+                args.normalize_supervised_by_weight_sum
+            ),
         )
 
     # 定义局部辅助函数，复用当前作用域中的上下文变量。
@@ -1478,9 +1719,20 @@ def train_supervised_structured_model(args: argparse.Namespace) -> None:
         "itransformer_heads": args.itransformer_heads,
         "stgcn_kernel_size": args.stgcn_kernel_size,
         "timesnet_kernel_sizes": args.timesnet_kernel_sizes,
-        "baseline_input": "aggregated_news_representations",
+        "ode_steps": args.ode_steps,
+        "ode_step_size": args.ode_step_size,
+        "grand_heads": args.grand_heads,
+        "grand_attention_dim": args.grand_attention_dim,
+        "gread_reaction": args.gread_reaction,
+        "gread_use_soft_adjacency": args.gread_use_soft_adjacency,
+        "prospective_embedding_dim": args.prospective_embedding_dim,
+        "baseline_input": (
+            "target_aligned_prospective_llm_consensus_embeddings"
+            if prospective_baseline
+            else "aggregated_news_representations"
+        ),
         "uses_supply_chain_graph": str(args.propagation_model).lower()
-        not in {"agcrn", "lstm"},
+        not in {"agcrn", "lstm", "prospective_mlp"},
         "uses_adaptive_graph": str(args.propagation_model).lower() == "agcrn",
         "graph_direction": data.graph.graph_direction,
         "diffusion_mode": args.diffusion_mode,
@@ -1492,6 +1744,8 @@ def train_supervised_structured_model(args: argparse.Namespace) -> None:
         "node_count": int(node_count),
         "input_news_count": int(len(data.news_metadata)),
         "supervised_time_count": int((data.supervision_weights.sum(axis=1) > 0).sum()),
+        "evaluate_test": bool(getattr(args, "evaluate_test", True)),
+        "consensus_hypothesis_limit": getattr(args, "consensus_hypothesis_limit", None),
         "splits": {},
         "history": history,
     }

@@ -1,0 +1,64 @@
+# ChainCAST prospective teacher: prompt selection followed by five independent
+# DeepSeek decodes per strictly pre-target sample.
+stage: optimize-prompt
+
+news_csv: data/News/DailyTop_News/daily_top_news.csv
+nodes_csv: data/IndustryChain/Filtered_Node_List_by_IGPC.csv
+output_dir: outputs/llm_event_tone_chaincast_multi
+
+topic_hs_map:
+  Automaker: 8703
+  Nexperia: 3818
+
+win: 5
+# Validation-search suggestion for M_hyp: [3, 5, 8, 10].
+num_hypotheses: 5
+split_strategy: time-series
+train_ratio: 0.70
+val_ratio: 0.15
+final_test_ratio: 0.15
+tscv_n_splits: 5
+tscv_test_size: null
+tscv_gap: 0
+
+llm_mode: api
+api_key_env: LLM_API_KEY
+api_base: https://api.deepseek.com
+api_model: deepseek-v4-flash
+temperature: 0.5
+top_p: 0.9
+thinking: auto
+reasoning_effort: none
+compress_max_tokens: 4096
+forecast_max_tokens: 4096
+request_sleep: 0.0
+llm_empty_retries: 3
+llm_empty_retry_sleep: 2.0
+force_llm: false
+
+forecast_prompt_guidance: ""
+forecast_prompt_path: configs/llm_tone/prompts/forecast/baseline.yaml
+optimizer_prompt_path: configs/llm_tone/prompts/optimizer/legacy.yaml
+prompt_optimization_rounds: 3
+prompt_loss_top_fraction: 0.20
+prompt_agent_max_tokens: 4096
+prompt_feedback_text_chars: 900
+prompt_feedback_history_chars: 600
+prompt_guidance_max_bullets: 12
+
+encoder_model: C:/Users/Administrator/.cache/modelscope/hub/models/BAAI/bge-base-en-v1.5
+encoder_device: cuda
+encoder_max_length: 512
+embedding_batch_size: 16
+pooling: cls
+
+train_device: cuda
+hidden_sizes: "256,64"
+dropout: 0.2
+batch_size: 16
+epochs: 300
+lr: 1e-3
+weight_decay: 1e-4
+patience: 30
+min_delta: 1e-5
+seed: 42

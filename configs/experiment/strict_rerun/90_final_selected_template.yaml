@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_final
+  - _self_
+
+# This automatically inherits every validation-selected value recorded in
+# 00_base_tuning.yaml. Do not select or edit it using test metrics.
+output_dir: "${paths.root_dir}/outputs/strict_rerun/final/chaincast_selected"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/final/chaincast_selected"

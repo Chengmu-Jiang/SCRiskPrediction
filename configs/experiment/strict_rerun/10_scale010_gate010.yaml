@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_tuning
+  - _self_
+output_dir: "${paths.root_dir}/outputs/strict_rerun/tuning/10_scale010_gate010"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/tuning/10_scale010_gate010"
+component_scale_init: 0.1
+rd_fusion_gate_init: 0.1
+

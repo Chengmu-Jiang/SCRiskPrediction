@@ -1,0 +1,77 @@
+# @package _global_
+
+# Shared strict protocol for validation-only searches.
+output_dir: "${paths.root_dir}/outputs/strict_rerun/tuning/base"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/tuning/base"
+
+llm_forecast_csv: "${paths.root_dir}/outputs/llm_event_tone_chaincast_multi/prompt_optimization/final/forecast_events.csv"
+llm_embedding_npz: "${paths.root_dir}/outputs/llm_event_tone_chaincast_multi/prompt_optimization/final/forecast_event_embeddings.npz"
+
+seed: 42
+repeat_seeds: "42"
+evaluate_test: false
+# Theoretical search ranges (use validation only):
+# epochs: 100-500; early_stopping_patience: 10-50.
+epochs: 300
+# lr: 1e-5-1e-2 on a log scale; weight_decay: 0-1e-2 on a log scale.
+# Selected by group 11 validation RMSE: 3.11265892600076.
+lr: 3e-4
+weight_decay: 1e-4
+grad_clip_norm: 5.0
+checkpoint_metric: "val_supervised"
+early_stopping_patience: 20
+early_stopping_min_delta: 1e-4
+tscv_n_splits: 5
+log_every: 10
+
+# Theoretical dimension range: 32-256; dropout range: 0.0-0.5.
+# Selected by group 12 validation RMSE: 3.1126589977764.
+projection_dim: 64
+representation_dim: 64
+graph_state_dim: 64
+sent_hidden_sizes: "128"
+eval_hidden_sizes: "64"
+dropout: 0.1
+graph_dropout: 0.1
+eval_dropout: 0.1
+
+target_orientation: "adverse"
+strict_pre_target: true
+fit_standardizer_on_train_only: true
+normalize_supervised_by_weight_sum: true
+
+smooth_weight: 0.0
+propagation_model: "lstm_component_fusion_gated_reaction_diffusion"
+graph_direction: "bidirectional"
+diffusion_mode: "deviation"
+diffusion_beta_transform: "sigmoid"
+diffusion_operator: "normalized_laplacian"
+initial_state_mode: "igpc"
+enable_graph_diffusion: true
+enable_two_hop_diffusion: false
+enable_recovery: true
+component_scale_mode: "learnable"
+# component_scale_init: 0.01-1.0; rd_fusion_gate_init: 0.01-0.99.
+# Selected by group 10 validation RMSE: 3.19124023355815.
+component_scale_init: 0.1
+rd_fusion_gate_init: 0.1
+
+alignment_mode: "consensus"
+# align_weight: 0.0-1.0; align_temperature: 0.03-0.50.
+# Group 20b selected 0.001 by validation RMSE: 3.11241533214012.
+align_weight: 0.001
+# Selected by group 21 validation RMSE: 3.11236766018441.
+align_temperature: 0.03
+align_dim: 64
+align_hidden_sizes: ""
+align_dropout: 0.1
+# consensus_gamma: 0.0-10.0; hypothesis count: 1-5 for the current cache.
+# Selected by group 23 validation RMSE: gamma=2.0, RMSE 3.11236753093187.
+consensus_gamma: 2.0
+# Selected by group 22 validation RMSE: 3.11236749370936.
+consensus_hypothesis_limit: 5
+alignment_norm_eps: 1e-8
+# negative_time_radius: 0-5; negative_graph_radius: 0-2.
+# Selected by group 24 validation RMSE: t=1, g=0, RMSE 3.11236750387843.
+negative_time_radius: 1
+negative_graph_radius: 0

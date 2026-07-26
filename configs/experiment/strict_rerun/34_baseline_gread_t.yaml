@@ -1,0 +1,17 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_final
+  - _self_
+
+output_dir: "${paths.root_dir}/outputs/strict_rerun/baselines/gread_t"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/baselines/gread_t"
+propagation_model: "gread_t"
+initial_state_mode: "fixed_zero"
+align_weight: 0.0
+smooth_weight: 0.0
+ode_steps: 4
+ode_step_size: 0.25
+gread_reaction: "bs"
+gread_use_soft_adjacency: true
+alpha_init: 0.1
+beta_init: 0.1

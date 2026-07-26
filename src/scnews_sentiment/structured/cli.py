@@ -151,6 +151,30 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     )
     # 执行 add_argument，完成当前步骤的副作用。
     parser.add_argument("--no-final-layer-norm", action="store_true")
+    parser.add_argument(
+        "--target-orientation",
+        choices=["original", "adverse"],
+        default="original",
+        help="Keep ArticleScore unchanged or negate it so larger targets mean more adverse coverage.",
+    )
+    parser.add_argument(
+        "--strict-pre-target",
+        action="store_true",
+        default=False,
+        help="Shift structural states so target t uses only news strictly before t.",
+    )
+    parser.add_argument(
+        "--fit-standardizer-on-train-only",
+        action="store_true",
+        default=False,
+        help="Fit GDELT standardization statistics on the current fold's training dates only.",
+    )
+    parser.add_argument(
+        "--normalize-supervised-by-weight-sum",
+        action="store_true",
+        default=False,
+        help="Normalize supervised squared error by the sum of active pair weights.",
+    )
 
     # 执行 add_argument，完成当前步骤的副作用。
     parser.add_argument("--node-code-col", default="hs_code_4d")
@@ -189,6 +213,11 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
             "stgcn",
             "itransformer",
             "timesnet",
+            "persistence",
+            "historical_mean",
+            "grand_t",
+            "gread_t",
+            "prospective_mlp",
             "gru_gated_reaction_diffusion",
             "lstm_gated_reaction_diffusion",
             "gru_z_gated_reaction_diffusion",
@@ -206,6 +235,50 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--itransformer-heads", type=int, default=4)
     parser.add_argument("--stgcn-kernel-size", type=int, default=3)
     parser.add_argument("--timesnet-kernel-sizes", default="1,3,5")
+    parser.add_argument(
+        "--ode-steps",
+        type=int,
+        default=4,
+        help="Number of fixed-step RK4 updates per event for GRAND-T/GREAD-T.",
+    )
+    parser.add_argument(
+        "--ode-step-size",
+        type=float,
+        default=0.25,
+        help="RK4 step size for GRAND-T/GREAD-T (steps * size is the ODE horizon).",
+    )
+    parser.add_argument("--grand-heads", type=int, default=4)
+    parser.add_argument("--grand-attention-dim", type=int, default=16)
+    parser.add_argument(
+        "--gread-reaction",
+        choices=[
+            "bs",
+            "fisher",
+            "allen_cahn",
+            "zeldovich",
+            "source",
+            "filter_bank",
+            "filter_bank_star",
+        ],
+        default="bs",
+    )
+    parser.add_argument(
+        "--gread-use-soft-adjacency",
+        dest="gread_use_soft_adjacency",
+        action="store_true",
+        default=True,
+    )
+    parser.add_argument(
+        "--gread-use-fixed-adjacency",
+        dest="gread_use_soft_adjacency",
+        action="store_false",
+    )
+    parser.add_argument(
+        "--prospective-embedding-dim",
+        type=int,
+        default=768,
+        help="Dimension of cached Prospective-LLM hypothesis embeddings.",
+    )
     parser.add_argument(
         "--component-scale-mode",
         choices=["learnable", "none"],
@@ -231,6 +304,18 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--eta-init", type=float, default=0.1)
     # 执行 add_argument，完成当前步骤的副作用。
     parser.add_argument("--recovery-eps", type=float, default=1e-6)
+    parser.add_argument(
+        "--diffusion-beta-transform",
+        choices=["softplus", "sigmoid"],
+        default="softplus",
+        help="Parameterization of beta; sigmoid constrains diffusion to (0, 1).",
+    )
+    parser.add_argument(
+        "--diffusion-operator",
+        choices=["legacy_row_sum", "normalized_laplacian"],
+        default="legacy_row_sum",
+        help="Use the historical row-sum Laplacian or (A_tilde - I) exactly.",
+    )
     # 执行 add_argument，完成当前步骤的副作用。
     parser.add_argument(
         "--diffusion-mode",
@@ -304,6 +389,25 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--align-hidden-sizes", default="")
     # 执行 add_argument，完成当前步骤的副作用。
     parser.add_argument("--align-dropout", type=float, default=0.1)
+    parser.add_argument(
+        "--alignment-mode",
+        choices=["single", "consensus"],
+        default="single",
+        help="Use one forecast embedding per sample or a consensus of multiple hypotheses.",
+    )
+    parser.add_argument("--consensus-gamma", type=float, default=0.0)
+    parser.add_argument(
+        "--consensus-hypothesis-limit",
+        type=int,
+        default=None,
+        help=(
+            "Use only the first N cached hypotheses per sample when constructing "
+            "the consensus teacher. None uses every cached hypothesis."
+        ),
+    )
+    parser.add_argument("--alignment-norm-eps", type=float, default=1e-8)
+    parser.add_argument("--negative-time-radius", type=int, default=0)
+    parser.add_argument("--negative-graph-radius", type=int, default=0)
     # 执行 add_argument，完成当前步骤的副作用。
     parser.add_argument("--llm-forecast-csv", type=Path, default=DEFAULT_LLM_FORECAST_CSV)
     # 执行 add_argument，完成当前步骤的副作用。
@@ -341,6 +445,18 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--tscv-test-size", type=int, default=None)
     # 执行 add_argument，完成当前步骤的副作用。
     parser.add_argument("--tscv-gap", type=int, default=0)
+    parser.add_argument(
+        "--evaluate-test",
+        action="store_true",
+        default=True,
+        help="Evaluate the final holdout only on the last expanding-window fold.",
+    )
+    parser.add_argument(
+        "--no-evaluate-test",
+        action="store_false",
+        dest="evaluate_test",
+        help="Suppress all final-holdout metrics and predictions during tuning.",
+    )
     # 执行 add_argument，完成当前步骤的副作用。
     parser.add_argument(
         "--early-stopping-patience",
@@ -403,6 +519,12 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         raise ValueError("--graph-state-dim must be divisible by --itransformer-heads.")
     if args.stgcn_kernel_size <= 0:
         raise ValueError("--stgcn-kernel-size must be positive.")
+    if args.ode_steps <= 0 or args.ode_step_size <= 0:
+        raise ValueError("--ode-steps and --ode-step-size must be positive.")
+    if args.grand_heads <= 0 or args.grand_attention_dim <= 0:
+        raise ValueError("--grand-heads and --grand-attention-dim must be positive.")
+    if args.prospective_embedding_dim <= 0:
+        raise ValueError("--prospective-embedding-dim must be positive.")
     if args.propagation_model == "timesnet":
         for item in str(args.timesnet_kernel_sizes).split(","):
             item = item.strip()
@@ -426,6 +548,8 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         if getattr(args, name) <= 0:
             # 抛出异常，阻止无效数据继续向下游传播。
             raise ValueError(f"--{name.replace('_', '-')} must be positive.")
+    if args.diffusion_beta_transform == "sigmoid" and not (0.0 < args.beta_init < 1.0):
+        raise ValueError("--beta-init must be in (0, 1) when sigmoid beta is enabled.")
     # 判断 args.upstream_loss_weight <= 0，决定是否进入对应分支。
     if args.upstream_loss_weight <= 0:
         # 抛出异常，阻止无效数据继续向下游传播。
@@ -446,6 +570,14 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     if args.align_dim <= 0:
         # 抛出异常，阻止无效数据继续向下游传播。
         raise ValueError("--align-dim must be positive.")
+    if args.consensus_gamma < 0:
+        raise ValueError("--consensus-gamma must be non-negative.")
+    if args.consensus_hypothesis_limit is not None and args.consensus_hypothesis_limit < 1:
+        raise ValueError("--consensus-hypothesis-limit must be positive when provided.")
+    if args.alignment_norm_eps <= 0:
+        raise ValueError("--alignment-norm-eps must be positive.")
+    if args.negative_time_radius < 0 or args.negative_graph_radius < 0:
+        raise ValueError("negative exclusion radii must be non-negative.")
     # 判断 not (0.0 <= args.align_dropout < 1.0)，决定是否进入对应分支。
     if not (0.0 <= args.align_dropout < 1.0):
         # 抛出异常，阻止无效数据继续向下游传播。

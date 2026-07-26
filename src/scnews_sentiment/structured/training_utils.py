@@ -105,6 +105,8 @@ def compute_supervised_loss(
     labels: Any,
     supervision_weights: Any,
     time_mask: Any,
+    *,
+    normalize_by_weight_sum: bool = False,
 ) -> Any:
     """计算带时间掩码和节点权重的监督 MSE 损失。
 
@@ -146,7 +148,14 @@ def compute_supervised_loss(
     # 计算并保存 mse，供后续逻辑复用。
     mse = (predictions - labels).pow(2)
     # 计算并保存 per_time_loss，供后续逻辑复用。
-    per_time_loss = (mse * supervision_weights).sum(dim=1)
+    weighted_mse = mse * supervision_weights
+    if normalize_by_weight_sum:
+        active_weights = supervision_weights * active_time_mask[:, None]
+        denominator = active_weights.sum()
+        if float(denominator.detach().cpu()) <= 0:
+            return predictions.sum() * 0.0
+        return (weighted_mse * active_time_mask[:, None]).sum() / denominator
+    per_time_loss = weighted_mse.sum(dim=1)
     # 返回当前函数的处理结果。
     return per_time_loss[active_time_mask].mean()
 
@@ -219,6 +228,8 @@ def compute_alignment_loss(
     semantic_projector: Any,
     struct_projector: Any,
     temperature: float,
+    pair_weights: Optional[Any] = None,
+    candidate_mask: Optional[Any] = None,
 ) -> Any:
     """Compute one-way InfoNCE from frozen LLM semantics to structured states."""
     # 导入当前函数需要的模块，避免非相关流程提前加载。
@@ -254,9 +265,32 @@ def compute_alignment_loss(
     # 计算并保存 logits，供后续逻辑复用。
     logits = semantic_z @ struct_z.t() / float(temperature)
     # 计算并保存 labels，供后续逻辑复用。
-    labels = torch.arange(logits.shape[0], device=logits.device)
+    active_count = logits.shape[0]
+    labels = torch.arange(active_count, device=logits.device)
     # 返回当前函数的处理结果。
-    return functional.cross_entropy(logits, labels)
+    if candidate_mask is not None:
+        active_candidate_mask = candidate_mask[active_pair_mask][:, active_pair_mask]
+        eligible = active_candidate_mask.sum(dim=1) >= 2
+        if not bool(eligible.any()):
+            return propagated_states.sum() * 0.0
+        logits = logits.masked_fill(~active_candidate_mask, float("-inf"))
+        per_anchor = functional.cross_entropy(
+            logits[eligible],
+            labels[eligible],
+            reduction="none",
+        )
+    else:
+        eligible = torch.ones(active_count, dtype=torch.bool, device=logits.device)
+        per_anchor = functional.cross_entropy(logits, labels, reduction="none")
+
+    if pair_weights is None:
+        active_weights = torch.ones(
+            active_count, dtype=per_anchor.dtype, device=per_anchor.device
+        )
+    else:
+        active_weights = pair_weights[active_pair_mask].to(per_anchor.dtype)
+    active_weights = active_weights[eligible]
+    return (per_anchor * active_weights).sum() / active_weights.sum().clamp_min(1e-12)
 
 
 def compute_structured_total_loss(
@@ -275,10 +309,19 @@ def compute_structured_total_loss(
     semantic_projector: Optional[Any] = None,
     struct_projector: Optional[Any] = None,
     align_temperature: float = 0.07,
+    align_pair_weights: Optional[Any] = None,
+    align_candidate_mask: Optional[Any] = None,
+    normalize_supervised_by_weight_sum: bool = False,
 ) -> Tuple[Any, Any, Any, Any]:
     """Return total, supervised, smoothness, and alignment losses."""
     # 计算并保存 sup，供后续逻辑复用。
-    sup = compute_supervised_loss(predictions, labels, supervision_weights, split_mask)
+    sup = compute_supervised_loss(
+        predictions,
+        labels,
+        supervision_weights,
+        split_mask,
+        normalize_by_weight_sum=normalize_supervised_by_weight_sum,
+    )
     # 计算并保存 smooth，供后续逻辑复用。
     smooth = compute_graph_smoothness_loss(predictions, adjacency, split_mask)
     # 计算并保存 align，供后续逻辑复用。
@@ -308,6 +351,8 @@ def compute_structured_total_loss(
             semantic_projector=semantic_projector,
             struct_projector=struct_projector,
             temperature=align_temperature,
+            pair_weights=align_pair_weights,
+            candidate_mask=align_candidate_mask,
         )
 
     # 计算并保存 total，供后续逻辑复用。

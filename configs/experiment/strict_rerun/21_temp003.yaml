@@ -1,0 +1,7 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_tuning
+  - _self_
+output_dir: "${paths.root_dir}/outputs/strict_rerun/tuning/21_temp003"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/tuning/21_temp003"
+align_temperature: 0.03

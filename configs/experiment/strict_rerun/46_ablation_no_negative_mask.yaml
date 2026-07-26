@@ -1,0 +1,8 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_final
+  - _self_
+output_dir: "${paths.root_dir}/outputs/strict_rerun/ablations/no_negative_mask"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/ablations/no_negative_mask"
+negative_time_radius: 0
+negative_graph_radius: 0

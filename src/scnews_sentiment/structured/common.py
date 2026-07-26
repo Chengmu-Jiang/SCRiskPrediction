@@ -285,12 +285,13 @@ class SupervisedTrainingData:
 
 
 @dataclass
-@dataclass
 class AlignmentBatch:
     """LLM semantic pairs aligned to structured time-node positions."""
 
     pair_metadata: pd.DataFrame
     semantic_embeddings: np.ndarray
+    pair_weights: np.ndarray
+    candidate_mask: np.ndarray
     time_index: np.ndarray
     node_index: np.ndarray
 

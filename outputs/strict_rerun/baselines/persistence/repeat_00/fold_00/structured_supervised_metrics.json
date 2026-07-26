@@ -1,0 +1,42 @@
+{
+  "best_epoch": 0,
+  "checkpoint_metric": null,
+  "best_checkpoint_metric_value": null,
+  "best_val_total_loss": null,
+  "best_val_supervised_loss": null,
+  "epochs_completed": 0,
+  "early_stopped": false,
+  "propagation_model": "persistence",
+  "baseline_input": "strictly_shifted_article_score_history",
+  "uses_supply_chain_graph": false,
+  "uses_adaptive_graph": false,
+  "evaluate_test": false,
+  "splits": {
+    "train": {
+      "count": 14,
+      "mse": 13.879317539674629,
+      "rmse": 3.725495609938982,
+      "mae": 3.007775136402675,
+      "r2": -0.22535910895658762,
+      "pearson": 0.3722880046123168,
+      "spearman": 0.2879120879120879,
+      "median_ae": 2.4426560401916504,
+      "p90_ae": 5.90475971698761,
+      "max_ae": 7.017543792724609,
+      "bias": -0.6155422755650112
+    },
+    "val": {
+      "count": 12,
+      "mse": 20.416999936142236,
+      "rmse": 4.518517448914216,
+      "mae": 3.619114577770233,
+      "r2": -0.6845061276872497,
+      "pearson": 0.21117222789122161,
+      "spearman": 0.30069930069930073,
+      "median_ae": 3.5941379070281982,
+      "p90_ae": 6.634928798675538,
+      "max_ae": 8.935742497444153,
+      "bias": -0.03273371855417887
+    }
+  }
+}

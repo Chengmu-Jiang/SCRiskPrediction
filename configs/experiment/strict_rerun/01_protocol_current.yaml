@@ -1,0 +1,14 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_tuning
+  - _self_
+
+# Diagnostic reproduction of the first strict run, without exposing test metrics.
+output_dir: "${paths.root_dir}/outputs/strict_rerun/tuning/01_protocol_current"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/tuning/01_protocol_current"
+lr: 5e-3
+component_scale_init: 0.9
+rd_fusion_gate_init: 0.95
+align_weight: 0.75
+align_temperature: 0.03
+

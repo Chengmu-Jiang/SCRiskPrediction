@@ -47,11 +47,15 @@ def save_embedding_cache(
     output_dir: Path,
 ) -> None:
     ensure_dir(output_dir)
-    np.savez(
-        output_dir / "forecast_event_embeddings.npz",
-        sample_id=forecasts["sample_id"].astype(str).to_numpy(),
-        embedding=embeddings,
-    )
+    payload = {
+        "sample_id": forecasts["sample_id"].astype(str).to_numpy(),
+        "embedding": embeddings,
+    }
+    if "hypothesis_index" in forecasts.columns:
+        payload["hypothesis_index"] = (
+            forecasts["hypothesis_index"].astype(int).to_numpy()
+        )
+    np.savez(output_dir / "forecast_event_embeddings.npz", **payload)
 
 
 def fit_mlp_from_embeddings(

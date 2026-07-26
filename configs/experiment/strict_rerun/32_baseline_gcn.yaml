@@ -1,0 +1,8 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_final
+  - _self_
+output_dir: "${paths.root_dir}/outputs/strict_rerun/baselines/gcn"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/baselines/gcn"
+propagation_model: "gcn"
+align_weight: 0.0

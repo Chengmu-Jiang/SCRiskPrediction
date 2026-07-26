@@ -1,0 +1,65 @@
+# @package _global_
+
+# Run configs/llm_tone/experiments/chaincast_multi_hypothesis.yaml first.
+output_dir: "${paths.root_dir}/outputs/structured_baselines/chaincast_final"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/structured_baselines/chaincast_final"
+
+llm_forecast_csv: "${paths.root_dir}/outputs/llm_event_tone_chaincast_multi/prompt_optimization/final/forecast_events.csv"
+llm_embedding_npz: "${paths.root_dir}/outputs/llm_event_tone_chaincast_multi/prompt_optimization/final/forecast_event_embeddings.npz"
+
+seed: 42
+repeat_seeds: "42,42,42,42,42"
+epochs: 300
+lr: 5e-3
+weight_decay: 1e-4
+grad_clip_norm: 5.0
+checkpoint_metric: "val_supervised"
+early_stopping_patience: 20
+early_stopping_min_delta: 1e-4
+tscv_n_splits: 5
+log_every: 10
+
+projection_dim: 64
+representation_dim: 64
+graph_state_dim: 64
+sent_hidden_sizes: "128"
+eval_hidden_sizes: "64"
+dropout: 0.1
+graph_dropout: 0.1
+eval_dropout: 0.1
+
+# Finalized strictly pre-target protocol. Defaults remain legacy-compatible.
+target_orientation: "adverse"
+strict_pre_target: true
+fit_standardizer_on_train_only: true
+normalize_supervised_by_weight_sum: true
+
+smooth_weight: 0.0
+propagation_model: "lstm_component_fusion_gated_reaction_diffusion"
+graph_direction: "bidirectional"
+diffusion_mode: "deviation"
+diffusion_beta_transform: "sigmoid"
+diffusion_operator: "normalized_laplacian"
+initial_state_mode: "igpc"
+enable_graph_diffusion: true
+enable_two_hop_diffusion: false
+enable_recovery: true
+component_scale_mode: "learnable"
+component_scale_init: 0.9
+rd_fusion_gate_init: 0.95
+
+alignment_mode: "consensus"
+# Validation-search suggestion for lambda_PSD: [0.0, 0.2, 0.5, 0.75, 1.0].
+align_weight: 0.75
+# Validation-search suggestion for kappa: [0.01, 0.03, 0.05, 0.07, 0.1].
+align_temperature: 0.03
+align_dim: 64
+align_hidden_sizes: ""
+align_dropout: 0.1
+# Validation-search suggestion for gamma: [0.0, 0.5, 1.0, 2.0, 5.0].
+consensus_gamma: 2.0
+alignment_norm_eps: 1e-8
+# Validation-search suggestion for r_time: [0, 1, 2, 3].
+negative_time_radius: 1
+# Validation-search suggestion for r_graph: [0, 1, 2].
+negative_graph_radius: 1

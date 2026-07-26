@@ -651,6 +651,8 @@ def load_label_matrix(
         examples = labels.loc[labels["article_score"].isna(), args.target_col].head(5).tolist()
         # 抛出异常，阻止无效数据继续向下游传播。
         raise ValueError(f"Label ArticleScore contains non-numeric values: {examples}")
+    if str(getattr(args, "target_orientation", "original")) == "adverse":
+        labels["article_score"] = -labels["article_score"]
 
     # 计算并保存 duplicated，供后续逻辑复用。
     duplicated = labels.duplicated(["topic", "date_yyyymmdd"], keep=False)
@@ -1150,6 +1152,20 @@ def build_supervised_training_data(args: argparse.Namespace) -> SupervisedTraini
             for split_name, mask in split_override.items()
         }
 
+    if bool(getattr(args, "fit_standardizer_on_train_only", False)):
+        train_mask = np.asarray(split_by_time["train"], dtype=bool)
+        train_dates = {
+            str(all_dates[index]) for index in np.flatnonzero(train_mask)
+        }
+        train_news_mask = metadata["date_yyyymmdd"].astype(str).isin(train_dates).to_numpy()
+        if not bool(train_news_mask.any()):
+            raise ValueError(
+                "No news rows fall inside the training dates; cannot fit fold-local "
+                "GDELT standardization statistics."
+            )
+        standardizer = FeatureStandardizer.fit(raw_gdelt[train_news_mask])
+        gdelt_features = standardizer.transform(raw_gdelt)
+
     # 计算并保存 parsed_dates，供后续逻辑复用。
     parsed_dates = pd.to_datetime(pd.Series(all_dates), format="%Y%m%d", errors="coerce")
     # 计算并保存 time_metadata，供后续逻辑复用。
@@ -1298,15 +1314,244 @@ def build_supervision_weights_for_splits(args: argparse.Namespace) -> np.ndarray
     return build_supervision_weights(label_mask, graph, args)
 
 
+def _build_distillation_candidate_mask(
+    time_indices: np.ndarray,
+    node_indices: np.ndarray,
+    graph: IndustryGraph,
+    *,
+    time_radius: int,
+    graph_radius: int,
+) -> np.ndarray:
+    pair_count = len(time_indices)
+    candidate_mask = np.ones((pair_count, pair_count), dtype=bool)
+    if pair_count == 0:
+        return candidate_mask
+
+    graph_neighbors: Dict[int, set[int]] = {}
+    if graph_radius > 0:
+        undirected = (np.asarray(graph.adjacency) + np.asarray(graph.adjacency).T) > 0
+        adjacency_lists = [
+            set(np.flatnonzero(undirected[index]).astype(int).tolist())
+            for index in range(undirected.shape[0])
+        ]
+        for source in set(node_indices.astype(int).tolist()):
+            visited = {source}
+            frontier = {source}
+            for _ in range(graph_radius):
+                frontier = {
+                    neighbor
+                    for node in frontier
+                    for neighbor in adjacency_lists[node]
+                    if neighbor not in visited
+                }
+                visited.update(frontier)
+                if not frontier:
+                    break
+            graph_neighbors[source] = visited
+
+    for anchor in range(pair_count):
+        for candidate in range(pair_count):
+            if anchor == candidate:
+                continue
+            same_node = int(node_indices[anchor]) == int(node_indices[candidate])
+            if same_node and abs(
+                int(time_indices[anchor]) - int(time_indices[candidate])
+            ) <= time_radius:
+                candidate_mask[anchor, candidate] = False
+            elif (
+                not same_node
+                and graph_radius > 0
+                and int(node_indices[candidate])
+                in graph_neighbors.get(int(node_indices[anchor]), set())
+            ):
+                candidate_mask[anchor, candidate] = False
+    return candidate_mask
+
+
+def _load_consensus_alignment_batch(
+    args: argparse.Namespace,
+    data: SupervisedTrainingData,
+) -> AlignmentBatch:
+    forecast_path = Path(args.llm_forecast_csv)
+    embedding_path = Path(args.llm_embedding_npz)
+    if not forecast_path.exists():
+        raise FileNotFoundError(f"LLM forecast CSV does not exist: {forecast_path}.")
+    if not embedding_path.exists():
+        raise FileNotFoundError(f"LLM embedding NPZ does not exist: {embedding_path}.")
+
+    forecasts = pd.read_csv(forecast_path, encoding=args.encoding)
+    require_columns(
+        forecasts,
+        ["sample_id", "hypothesis_index", "target_date", "hs_code_4d"],
+        str(forecast_path),
+    )
+    forecasts = forecasts.copy()
+    forecasts["sample_id"] = forecasts["sample_id"].astype(str)
+    forecasts["hypothesis_index"] = forecasts["hypothesis_index"].astype(int)
+    if "history_len" in forecasts.columns:
+        forecasts = forecasts[
+            pd.to_numeric(forecasts["history_len"], errors="coerce").fillna(0) > 0
+        ].copy()
+    duplicate_keys = forecasts.duplicated(
+        ["sample_id", "hypothesis_index"], keep=False
+    )
+    if duplicate_keys.any():
+        raise ValueError(
+            "LLM forecast CSV has duplicated sample_id/hypothesis_index pairs."
+        )
+
+    with np.load(embedding_path, allow_pickle=True) as npz:
+        if not {"sample_id", "hypothesis_index", "embedding"}.issubset(npz.files):
+            raise ValueError(
+                f"{embedding_path} must contain sample_id, hypothesis_index, "
+                "and embedding arrays for consensus alignment."
+            )
+        embedding_sample_ids = np.asarray(npz["sample_id"]).astype(str)
+        embedding_hypothesis_indices = np.asarray(npz["hypothesis_index"]).astype(int)
+        embeddings = np.asarray(npz["embedding"], dtype=np.float32)
+    if embeddings.ndim != 2 or not np.isfinite(embeddings).all():
+        raise ValueError("LLM embeddings must be a finite 2-D array.")
+    if not (
+        len(embedding_sample_ids)
+        == len(embedding_hypothesis_indices)
+        == embeddings.shape[0]
+    ):
+        raise ValueError("LLM embedding key lengths do not match embedding rows.")
+
+    embedding_lookup: Dict[Tuple[str, int], int] = {}
+    for index, key in enumerate(
+        zip(embedding_sample_ids.tolist(), embedding_hypothesis_indices.tolist())
+    ):
+        normalized_key = (str(key[0]), int(key[1]))
+        if normalized_key in embedding_lookup:
+            raise ValueError(f"Duplicated LLM embedding key: {normalized_key}.")
+        embedding_lookup[normalized_key] = index
+
+    normalized_dates = normalize_date_column(forecasts["target_date"])
+    forecasts["date_yyyymmdd"] = normalized_dates["date_yyyymmdd"]
+    node_to_index = {code: index for index, code in enumerate(data.graph.node_codes)}
+    date_to_index = {
+        str(row["date_yyyymmdd"]): int(row["time_index"])
+        for _, row in data.time_metadata.iterrows()
+    }
+    split_lookup = {
+        int(time_index): split_name
+        for split_name, split_mask in data.split_by_time.items()
+        for time_index in np.where(split_mask)[0]
+    }
+
+    rows: List[Dict[str, Any]] = []
+    prototypes: List[np.ndarray] = []
+    pair_weights: List[float] = []
+    time_indices: List[int] = []
+    node_indices: List[int] = []
+    eps = float(args.alignment_norm_eps)
+    gamma = float(args.consensus_gamma)
+    hypothesis_limit = getattr(args, "consensus_hypothesis_limit", None)
+
+    for sample_id, group in forecasts.groupby("sample_id", sort=False):
+        group = group.sort_values("hypothesis_index")
+        for column in ["target_date", "date_yyyymmdd", "hs_code_4d"]:
+            if group[column].astype(str).nunique() != 1:
+                raise ValueError(
+                    f"Consensus group {sample_id} has inconsistent {column} values."
+                )
+        if "num_hypotheses" in group.columns:
+            expected = int(group["num_hypotheses"].iloc[0])
+            if len(group) != expected:
+                raise ValueError(
+                    f"Consensus group {sample_id} has {len(group)} rows; "
+                    f"expected {expected}."
+                )
+        if hypothesis_limit is not None:
+            if int(hypothesis_limit) > len(group):
+                raise ValueError(
+                    f"Consensus group {sample_id} has only {len(group)} cached "
+                    f"hypotheses; requested {hypothesis_limit}."
+                )
+            group = group.head(int(hypothesis_limit)).copy()
+
+        group_embeddings: List[np.ndarray] = []
+        for _, row in group.iterrows():
+            key = (str(sample_id), int(row["hypothesis_index"]))
+            if key not in embedding_lookup:
+                raise ValueError(f"Missing LLM embedding for {key}.")
+            vector = embeddings[embedding_lookup[key]]
+            norm = float(np.linalg.norm(vector))
+            group_embeddings.append(vector / max(norm, eps))
+        mean_embedding = np.mean(np.vstack(group_embeddings), axis=0)
+        concentration = float(np.linalg.norm(mean_embedding))
+        if concentration <= eps:
+            continue
+
+        row0 = group.iloc[0]
+        date_text = str(row0["date_yyyymmdd"])
+        raw_hs_code = normalize_hs4(row0["hs_code_4d"])
+        topic = str(row0.get("topic", ""))
+        mapped_hs_code = data.topic_hs_map.get(topic)
+        hs_code = normalize_hs4(mapped_hs_code) if mapped_hs_code else raw_hs_code
+        if date_text not in date_to_index or hs_code not in node_to_index:
+            continue
+        time_index = date_to_index[date_text]
+        node_index = node_to_index[hs_code]
+        prototype = (mean_embedding / concentration).astype(np.float32)
+        weight = float(np.exp(-gamma * (1.0 - concentration)))
+
+        prototypes.append(prototype)
+        pair_weights.append(weight)
+        time_indices.append(time_index)
+        node_indices.append(node_index)
+        rows.append(
+            {
+                "sample_id": str(sample_id),
+                "llm_split": str(row0.get("split", "")),
+                "topic": topic,
+                "target_date": str(row0["target_date"]),
+                "date_yyyymmdd": date_text,
+                "hs_code_4d": hs_code,
+                "time_index": time_index,
+                "node_index": node_index,
+                "structured_split": split_lookup.get(time_index, ""),
+                "hypothesis_count": int(len(group)),
+                "hypothesis_concentration": concentration,
+                "distillation_weight": weight,
+            }
+        )
+
+    if not rows:
+        raise ValueError("No eligible consensus teacher/student pairs were constructed.")
+    time_array = np.asarray(time_indices, dtype=np.int64)
+    node_array = np.asarray(node_indices, dtype=np.int64)
+    candidate_mask = _build_distillation_candidate_mask(
+        time_array,
+        node_array,
+        data.graph,
+        time_radius=int(args.negative_time_radius),
+        graph_radius=int(args.negative_graph_radius),
+    )
+    return AlignmentBatch(
+        pair_metadata=pd.DataFrame(rows),
+        semantic_embeddings=np.vstack(prototypes).astype(np.float32),
+        pair_weights=np.asarray(pair_weights, dtype=np.float32),
+        candidate_mask=candidate_mask,
+        time_index=time_array,
+        node_index=node_array,
+    )
+
+
 def load_alignment_batch(
     args: argparse.Namespace,
     data: SupervisedTrainingData,
+    *,
+    force: bool = False,
 ) -> Optional[AlignmentBatch]:
     """Load frozen LLM semantic embeddings and align them by target date and HS4."""
     # 判断 args.align_weight <= 0，决定是否进入对应分支。
-    if args.align_weight <= 0:
+    if args.align_weight <= 0 and not force:
         # 返回当前分支或函数的处理结果。
         return None
+    if str(getattr(args, "alignment_mode", "single")) == "consensus":
+        return _load_consensus_alignment_batch(args, data)
 
     # 计算并保存 forecast_path，供后续逻辑复用。
     forecast_path = Path(args.llm_forecast_csv)
@@ -1497,6 +1742,8 @@ def load_alignment_batch(
     return AlignmentBatch(
         pair_metadata=pair_metadata,
         semantic_embeddings=np.vstack(selected_embeddings).astype(np.float32),
+        pair_weights=np.ones(len(rows), dtype=np.float32),
+        candidate_mask=np.ones((len(rows), len(rows)), dtype=bool),
         time_index=np.asarray(time_indices, dtype=np.int64),
         node_index=np.asarray(node_indices, dtype=np.int64),
     )

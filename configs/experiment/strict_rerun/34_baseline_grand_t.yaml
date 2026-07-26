@@ -1,0 +1,15 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_final
+  - _self_
+
+output_dir: "${paths.root_dir}/outputs/strict_rerun/baselines/grand_t"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/baselines/grand_t"
+propagation_model: "grand_t"
+initial_state_mode: "fixed_zero"
+align_weight: 0.0
+smooth_weight: 0.0
+ode_steps: 4
+ode_step_size: 0.25
+grand_heads: 4
+grand_attention_dim: 16

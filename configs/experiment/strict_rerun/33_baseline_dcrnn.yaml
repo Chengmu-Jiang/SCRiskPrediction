@@ -1,0 +1,10 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_final
+  - _self_
+output_dir: "${paths.root_dir}/outputs/strict_rerun/baselines/dcrnn"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/baselines/dcrnn"
+propagation_model: "dcrnn"
+dcrnn_diffusion_steps: 2
+dcrnn_bidirectional: false
+align_weight: 0.0

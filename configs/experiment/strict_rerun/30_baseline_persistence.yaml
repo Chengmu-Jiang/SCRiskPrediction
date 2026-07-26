@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_final
+  - _self_
+output_dir: "${paths.root_dir}/outputs/strict_rerun/baselines/persistence"
+tensorboard_log_dir: null
+repeat_seeds: "42"
+propagation_model: "persistence"
+align_weight: 0.0

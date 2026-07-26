@@ -1,0 +1,55 @@
+{
+  "best_epoch": 0,
+  "checkpoint_metric": null,
+  "best_checkpoint_metric_value": null,
+  "best_val_total_loss": null,
+  "best_val_supervised_loss": null,
+  "epochs_completed": 0,
+  "early_stopped": false,
+  "propagation_model": "persistence",
+  "baseline_input": "strictly_shifted_article_score_history",
+  "uses_supply_chain_graph": false,
+  "uses_adaptive_graph": false,
+  "evaluate_test": true,
+  "splits": {
+    "train": {
+      "count": 66,
+      "mse": 18.72350021640459,
+      "rmse": 4.327066005552099,
+      "mae": 3.271911686116999,
+      "r2": -0.40126720538402183,
+      "pearson": 0.29324232272341993,
+      "spearman": 0.3606930383049787,
+      "median_ae": 2.218075469136238,
+      "p90_ae": 7.131690144538879,
+      "max_ae": 11.844486236572266,
+      "bias": 0.01782017946243286
+    },
+    "val": {
+      "count": 12,
+      "mse": 7.291498697867958,
+      "rmse": 2.7002775223794977,
+      "mae": 2.345840472728014,
+      "r2": 0.4372778916818334,
+      "pearson": 0.7323766940268647,
+      "spearman": 0.6783216783216784,
+      "median_ae": 2.128298692405224,
+      "p90_ae": 3.604646921157837,
+      "max_ae": 5.311786890029907,
+      "bias": 0.03756231193741163
+    },
+    "test": {
+      "count": 12,
+      "mse": 6.486231206089947,
+      "rmse": 2.546808042646706,
+      "mae": 2.1733091759184995,
+      "r2": 0.23186805165335478,
+      "pearson": 0.6172968366748917,
+      "spearman": 0.7692307692307694,
+      "median_ae": 1.954234004020691,
+      "p90_ae": 3.8578675508499147,
+      "max_ae": 5.338849306106567,
+      "bias": -0.09624384964505832
+    }
+  }
+}

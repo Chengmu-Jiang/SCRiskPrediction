@@ -1,0 +1,12 @@
+# @package _global_
+
+# Shared strict protocol for final-fold-only test evaluation.
+defaults:
+  - /experiment/strict_rerun/00_base_tuning
+  - _self_
+
+output_dir: "${paths.root_dir}/outputs/strict_rerun/final/base"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/final/base"
+repeat_seeds: "42,2026,3407,8703,3818"
+evaluate_test: true
+

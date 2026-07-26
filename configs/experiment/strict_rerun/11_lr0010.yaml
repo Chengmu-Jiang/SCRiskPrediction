@@ -1,0 +1,8 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_tuning
+  - _self_
+output_dir: "${paths.root_dir}/outputs/strict_rerun/tuning/11_lr0010"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/tuning/11_lr0010"
+lr: 1e-3
+

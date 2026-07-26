@@ -17,7 +17,7 @@ def test_best_experiment_maps_to_structured_namespace() -> None:
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_pipeline_8703"],
+            overrides=["experiment=legacy/structured_pipeline_8703"],
         )
 
     args = structured_namespace_from_cfg(cfg)
@@ -56,19 +56,19 @@ def test_repeat_seeds_config_maps_to_structured_namespace() -> None:
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_ours"],
+            overrides=["experiment=legacy/structured_ours"],
         )
 
     args = structured_namespace_from_cfg(cfg)
 
-    assert args.repeat_seeds == "42,2026,3407,8703,3818"
+    assert args.repeat_seeds == "42,42,42,42,42"
 
 
 def test_dcrnn_baseline_config_maps_to_structured_namespace() -> None:
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_baseline_dcrnn_bi"],
+            overrides=["experiment=legacy/structured_baseline_dcrnn_bi"],
         )
 
     args = structured_namespace_from_cfg(cfg)
@@ -84,7 +84,7 @@ def test_gat_baseline_config_maps_to_structured_namespace() -> None:
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_baseline_gat"],
+            overrides=["experiment=legacy/structured_baseline_gat"],
         )
 
     args = structured_namespace_from_cfg(cfg)
@@ -99,7 +99,7 @@ def test_gru_gated_reaction_diffusion_config_maps_to_structured_namespace() -> N
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_baseline_gru_gated_reaction_diffusion"],
+            overrides=["experiment=legacy/structured_baseline_gru_gated_reaction_diffusion"],
         )
 
     args = structured_namespace_from_cfg(cfg)
@@ -118,7 +118,7 @@ def test_lstm_gated_reaction_diffusion_config_maps_to_structured_namespace() -> 
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_baseline_lstm_gated_reaction_diffusion"],
+            overrides=["experiment=legacy/structured_baseline_lstm_gated_reaction_diffusion"],
         )
 
     args = structured_namespace_from_cfg(cfg)
@@ -137,7 +137,7 @@ def test_gru_z_gated_reaction_diffusion_config_maps_to_structured_namespace() ->
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_baseline_gru_z_gated_reaction_diffusion"],
+            overrides=["experiment=legacy/structured_baseline_gru_z_gated_reaction_diffusion"],
         )
 
     args = structured_namespace_from_cfg(cfg)
@@ -156,7 +156,7 @@ def test_lstm_z_gated_reaction_diffusion_config_maps_to_structured_namespace() -
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_baseline_lstm_z_gated_reaction_diffusion"],
+            overrides=["experiment=legacy/structured_baseline_lstm_z_gated_reaction_diffusion"],
         )
 
     args = structured_namespace_from_cfg(cfg)
@@ -176,7 +176,7 @@ def test_lstm_component_gated_reaction_diffusion_config_maps_to_structured_names
         cfg = compose(
             config_name="train.yaml",
             overrides=[
-                "experiment=structured_baseline_lstm_component_gated_reaction_diffusion"
+                "experiment=legacy/structured_baseline_lstm_component_gated_reaction_diffusion"
             ],
         )
 
@@ -197,7 +197,7 @@ def test_lstm_component_gated_no_scale_config_maps_to_structured_namespace() -> 
         cfg = compose(
             config_name="train.yaml",
             overrides=[
-                "experiment="
+                "experiment=legacy/"
                 "structured_baseline_lstm_component_gated_reaction_diffusion_no_scale"
             ],
         )
@@ -219,7 +219,7 @@ def test_lstm_component_fusion_gated_config_maps_to_structured_namespace() -> No
         cfg = compose(
             config_name="train.yaml",
             overrides=[
-                "experiment="
+                "experiment=legacy/"
                 "structured_baseline_lstm_component_fusion_gated_reaction_diffusion"
             ],
         )
@@ -242,7 +242,7 @@ def test_lstm_component_fusion_gated_no_scale_config_maps_to_structured_namespac
         cfg = compose(
             config_name="train.yaml",
             overrides=[
-                "experiment="
+                "experiment=legacy/"
                 "structured_baseline_lstm_component_fusion_gated_reaction_diffusion_no_scale"
             ],
         )
@@ -265,7 +265,7 @@ def test_stgcn_baseline_config_maps_to_structured_namespace() -> None:
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_baseline_stgcn"],
+            overrides=["experiment=legacy/structured_baseline_stgcn"],
         )
 
     args = structured_namespace_from_cfg(cfg)
@@ -288,7 +288,7 @@ def test_agcrn_baseline_config_maps_to_structured_namespace() -> None:
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_baseline_agcrn"],
+            overrides=["experiment=legacy/structured_baseline_agcrn"],
         )
 
     args = structured_namespace_from_cfg(cfg)
@@ -309,7 +309,7 @@ def test_itransformer_baseline_config_maps_to_structured_namespace() -> None:
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_baseline_itransformer"],
+            overrides=["experiment=legacy/structured_baseline_itransformer"],
         )
 
     args = structured_namespace_from_cfg(cfg)
@@ -327,7 +327,7 @@ def test_timesnet_baseline_config_maps_to_structured_namespace() -> None:
     with initialize(version_base="1.3", config_path="../configs"):
         cfg = compose(
             config_name="train.yaml",
-            overrides=["experiment=structured_baseline_timesnet"],
+            overrides=["experiment=legacy/structured_baseline_timesnet"],
         )
 
     args = structured_namespace_from_cfg(cfg)
@@ -339,3 +339,73 @@ def test_timesnet_baseline_config_maps_to_structured_namespace() -> None:
     assert args.ts_baseline_lookback == 5
     assert args.timesnet_kernel_sizes == "1,3,5"
     assert args.output_dir == Path("outputs/structured_baselines/timesnet")
+
+
+def test_strict_tuning_config_hides_final_test() -> None:
+    with initialize(version_base="1.3", config_path="../configs"):
+        cfg = compose(
+            config_name="train.yaml",
+            overrides=["experiment=strict_rerun/22_mhyp3"],
+        )
+
+    args = structured_namespace_from_cfg(cfg)
+
+    assert args.strict_pre_target is True
+    assert args.fit_standardizer_on_train_only is True
+    assert args.normalize_supervised_by_weight_sum is True
+    assert args.evaluate_test is False
+    assert args.repeat_seeds == "42"
+    assert args.alignment_mode == "consensus"
+    assert args.consensus_hypothesis_limit == 3
+
+
+def test_strict_final_config_uses_distinct_seeds() -> None:
+    with initialize(version_base="1.3", config_path="../configs"):
+        cfg = compose(
+            config_name="train.yaml",
+            overrides=["experiment=strict_rerun/40_ablation_full"],
+        )
+
+    args = structured_namespace_from_cfg(cfg)
+
+    assert args.evaluate_test is True
+    assert args.repeat_seeds == "42,2026,3407,8703,3818"
+    assert args.graph_direction == "bidirectional"
+    assert args.target_orientation == "adverse"
+
+
+def test_naive_persistence_config_maps_to_structured_namespace() -> None:
+    with initialize(version_base="1.3", config_path="../configs"):
+        cfg = compose(
+            config_name="train.yaml",
+            overrides=["experiment=strict_rerun/30_baseline_persistence"],
+        )
+
+    args = structured_namespace_from_cfg(cfg)
+
+    assert args.propagation_model == "persistence"
+    assert args.align_weight == 0.0
+    assert args.evaluate_test is True
+
+
+def test_new_literature_baseline_configs_map_to_structured_namespace() -> None:
+    names = {
+        "34_baseline_grand_t": "grand_t",
+        "34_baseline_gread_t": "gread_t",
+        "34_baseline_prospective_mlp": "prospective_mlp",
+    }
+    with initialize(version_base="1.3", config_path="../configs"):
+        for config_name, model_name in names.items():
+            cfg = compose(
+                config_name="train.yaml",
+                overrides=[f"experiment=strict_rerun/{config_name}"],
+            )
+            args = structured_namespace_from_cfg(cfg)
+
+            assert args.propagation_model == model_name
+            assert args.align_weight == 0.0
+            assert args.evaluate_test is True
+            assert args.repeat_seeds == "42,2026,3407,8703,3818"
+
+    assert args.prospective_embedding_dim == 768
+    assert args.alignment_mode == "consensus"

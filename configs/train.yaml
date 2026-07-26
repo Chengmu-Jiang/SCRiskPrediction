@@ -36,6 +36,7 @@ final_test_ratio: 0.15
 tscv_n_splits: 5
 tscv_test_size: null
 tscv_gap: 0
+evaluate_test: true
 
 early_stopping_patience: 0
 early_stopping_min_delta: 1e-4

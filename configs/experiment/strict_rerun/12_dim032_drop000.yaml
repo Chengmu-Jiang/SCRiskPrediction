@@ -1,0 +1,16 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_tuning
+  - _self_
+output_dir: "${paths.root_dir}/outputs/strict_rerun/tuning/12_dim032_drop000"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/tuning/12_dim032_drop000"
+projection_dim: 32
+representation_dim: 32
+graph_state_dim: 32
+eval_hidden_sizes: "32"
+align_dim: 32
+dropout: 0.0
+graph_dropout: 0.0
+eval_dropout: 0.0
+align_dropout: 0.0
+

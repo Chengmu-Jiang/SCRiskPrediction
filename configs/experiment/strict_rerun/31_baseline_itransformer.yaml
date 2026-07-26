@@ -1,0 +1,10 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_final
+  - _self_
+output_dir: "${paths.root_dir}/outputs/strict_rerun/baselines/itransformer"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/baselines/itransformer"
+propagation_model: "itransformer"
+ts_baseline_lookback: 5
+itransformer_heads: 4
+align_weight: 0.0

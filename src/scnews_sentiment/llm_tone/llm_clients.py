@@ -23,6 +23,7 @@ class RemoteLLM(BaseLLM):
         base_url: str,
         model_name: str,
         temperature: float,
+        top_p: float,
         thinking: str,
         reasoning_effort: str,
     ) -> None:
@@ -30,6 +31,7 @@ class RemoteLLM(BaseLLM):
 
         self.model_name = model_name
         self.temperature = temperature
+        self.top_p = top_p
         self.thinking = thinking
         self.reasoning_effort = reasoning_effort
         self.last_response_info = {}
@@ -46,6 +48,7 @@ class RemoteLLM(BaseLLM):
                 {"role": "user", "content": prompt},
             ],
             "temperature": self.temperature,
+            "top_p": self.top_p,
             "max_tokens": max_tokens,
         }
         if self.reasoning_effort != "none":
@@ -140,6 +143,7 @@ def get_llm(args: argparse.Namespace) -> BaseLLM:
             base_url=args.api_base,
             model_name=args.api_model,
             temperature=args.temperature,
+            top_p=args.top_p,
             thinking=args.thinking,
             reasoning_effort=args.reasoning_effort,
         )

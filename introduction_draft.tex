@@ -1,0 +1,34 @@
+% =====================================================================
+% Redrafted Introduction for ChainCAST (standalone fragment)
+% ---------------------------------------------------------------------
+% Design notes (remove before merging):
+%   * The two guiding questions are promoted to the END of paragraph 1,
+%     so they scaffold the whole introduction instead of appearing as a
+%     conclusion of the gap analysis.
+%   * Paragraph 2 develops the structural question ("where");
+%     paragraph 3 develops the prospective question ("what next") and
+%     lets the distillation motivation emerge as the natural difficulty
+%     of answering it in a deployable forecaster -- no bolted-on
+%     "Moreover" sentence.
+%   * All citation keys match aaai2027.bib / the main manuscript.
+%   * Results paragraph keeps the provisional phrasing because the
+%     finalized experiments are still running.
+% =====================================================================
+
+\section{Introduction}
+
+Modern production systems are organized as interconnected networks of firms and products linked through complex input--output dependencies \cite{baldwin2022risks,elliott2022supply}. While such specialization improves efficiency, it also creates channels through which localized disruptions travel along direct and indirect linkages to upstream suppliers and downstream producers \cite{elliott2022supply,grossman2023resilience,lafrogne2023supply,demir2024financial,meier2024covid}. Because countermeasures such as sourcing diversification, buffer adjustment, and production re-planning cannot be implemented instantaneously \cite{grossman2023resilience,lafrogne2023supply}, effective risk management depends on recognizing emerging risk tendencies before their consequences fully materialize. News streams are a natural basis for such early recognition, since disruptive events are typically reported well before their operational effects have finished unfolding. We therefore study news-driven supply chain risk forecasting: given a product network and historical news, predict the next-step product-level risk signal. Delivering such forecasts requires answering two coupled questions: \textbf{where may the impact propagate}, and \textbf{what may happen next}?
+
+The first question concerns how a news-induced shock alters the risk state of the affected product and how its effects subsequently spread over product dependencies. Classical propagation studies rely on observed supply relationships and predefined mechanisms, supporting ex post impact identification or scenario simulation rather than forecasting \cite{carvalho2021supply,inoue2019firm,li2021ripple}. Data-driven spatiotemporal graph models learn relational and temporal dependencies jointly \cite{DBLP:conf/iclr/LiYS018,DBLP:conf/ijcai/YuYZ18}, but their monolithic update rules entangle event-induced responses, cross-node influence, and historical state retention, obscuring the distinct roles that risk injection, local reaction, network diffusion, and temporal memory play in risk evolution. Differential-equation-inspired models offer a cleaner decomposition---GRAND casts graph learning as diffusion, and GREAD separates local reaction from information exchange \cite{DBLP:conf/icml/0001RGBWR21,DBLP:conf/icml/00020PC23}---yet they assume node states are given in advance rather than continuously injected by an arriving news stream.
+
+The second question cannot be answered by propagation modeling alone, because historical news records what has already been observed, whereas early warning hinges on how ongoing events may continue. Event-forecasting methods, increasingly built on large language models, can generate plausible continuations of an unfolding situation \cite{DBLP:conf/aaai/HuLNLS17,DBLP:conf/nips/ShiXWZZZTM23,DBLP:journals/corr/abs-2407-01231}. Exploiting this prospective ability for supply chain forecasting, however, is not straightforward: generated event classes, relations, or free-form text are not aligned with product-level risk signals, and querying a language model at every inference step is costly and produces variable generations. Knowledge distillation offers a deployable alternative, transferring the language model's prospective semantics into the forecaster during training only \cite{hinton2015distilling,DBLP:conf/iclr/TianKI20}. Yet existing language-model distillation for forecasting aligns the student with the teacher's view of observed inputs or of privileged future information \cite{liu2025calf,liu2025timekd}, and treats every teacher generation as equally reliable---a fragile assumption when hypotheses about an uncertain future genuinely disagree.
+
+We propose ChainCAST, which answers the two questions with a structural forecasting path and a training-only prospective semantic teacher. The structural path converts observed news into node-level injections and evolves reference-relative product states through normalized association-aware diffusion, adaptive saturating reaction, and gated temporal memory, so that each source of state variation remains explicit. The teacher addresses the prospective question without violating deployability: from each product's strictly pre-target news history, a frozen language model samples multiple plausible next-event hypotheses, and their semantic consensus defines both the distillation target and its weight, so that dispersed hypothesis sets exert less influence on training. After training, the teacher is discarded; inference requires only historical news and the product graph.
+
+Provisional experiments on a real-world news--product dataset suggest that ChainCAST attains lower prediction error and higher explained variance than the evaluated temporal forecasting and graph neural network baselines. Because all results must be regenerated under the finalized strict pre-target evaluation protocol, we defer definitive quantitative claims until the rerun is complete. Our main contributions are summarized as follows:
+
+\begin{itemize}
+    \item We formulate strictly pre-target, one-event-step-ahead forecasting of media-derived product risk signals over a sparse product association graph.
+    \item We develop reference-relative graph dynamics that separate news injection, normalized association-aware diffusion, adaptive saturating reaction, and gated temporal memory.
+    \item We introduce consensus-weighted prospective semantic distillation: multiple plausible next-event hypotheses supervise the structural state during training, while low hypothesis concentration reduces the auxiliary weight and the teacher is removed at inference.
+\end{itemize}

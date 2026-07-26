@@ -1,0 +1,970 @@
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai2027}  % DO NOT CHANGE THIS
+% The serif, sans-serif, and monospaced fonts are loaded automatically by
+% aaai2027.sty (newtxtext, helvet, courier). DO NOT add \usepackage{times},
+% \usepackage{helvet}, \usepackage{courier}, or any other font package.
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\usepackage{caption} % DO NOT CHANGE THIS AND DO NOT ADD ANY OPTIONS TO IT
+\frenchspacing  % DO NOT CHANGE THIS
+%
+% These are recommended to typeset algorithms but not required. See the subsubsection on algorithms. Remove them if you don't have algorithms in your paper.
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+%
+% These are recommended to typeset listings but not required. See the subsubsection on listing. Remove this block if you don't have listings in your paper.
+\usepackage{newfloat}
+\usepackage{listings}
+\DeclareCaptionStyle{ruled}{labelfont=normalfont,labelsep=colon,strut=off} % DO NOT CHANGE THIS
+\lstset{%
+	basicstyle={\footnotesize\ttfamily},% footnotesize acceptable for monospace
+	numbers=left,numberstyle=\footnotesize,xleftmargin=2em,% show line numbers, remove this entire line if you don't want the numbers.
+	aboveskip=0pt,belowskip=0pt,%
+	showstringspaces=false,tabsize=2,breaklines=true}
+\floatstyle{ruled}
+\newfloat{listing}{tb}{lst}{}
+\floatname{listing}{Listing}
+
+%
+% Recommended for better-looking tables
+\usepackage{booktabs}
+
+
+\usepackage{amssymb}
+\usepackage{soul, color, xcolor}
+\usepackage{amsmath}
+
+%
+% Keep the \pdfinfo as shown here. There's no need
+% for you to add the /Title and /Author tags.
+\pdfinfo{
+/TemplateVersion (2027.1)
+}
+
+% DISALLOWED PACKAGES
+% \usepackage{authblk} -- This package is specifically forbidden
+% \usepackage{balance} -- This package is specifically forbidden
+% \usepackage{CJK} -- This package is specifically forbidden
+% \usepackage{float} -- This package is specifically forbidden
+% \usepackage{flushend} -- This package is specifically forbidden
+% \usepackage{fullpage} -- This package is specifically forbidden
+% \usepackage{geometry} -- This package is specifically forbidden
+% \usepackage{hyperref} -- This package is specifically forbidden
+% \usepackage{navigator} -- This package is specifically forbidden
+% (or any other package that embeds links such as navigator or hyperref)
+% \usepackage{indentfirst} -- This package is specifically forbidden
+% \usepackage{layout} -- This package is specifically forbidden
+% \usepackage{multicol} -- This package is specifically forbidden
+% \usepackage{nameref} -- This package is specifically forbidden
+% \usepackage{savetrees} -- This package is specifically forbidden
+% \usepackage{setspace} -- This package is specifically forbidden
+% \usepackage{stfloats} -- This package is specifically forbidden
+% \usepackage{tabu} -- This package is specifically forbidden
+% \usepackage{titlesec} -- This package is specifically forbidden
+% \usepackage{tocbibind} -- This package is specifically forbidden
+% \usepackage{ulem} -- This package is specifically forbidden
+% \usepackage{wrapfig} -- This package is specifically forbidden
+% DISALLOWED COMMANDS
+% \nocopyright -- Your paper will not be published if you use this command
+% \addtolength -- This command may not be used
+% \balance -- This command may not be used
+% \baselinestretch -- Your paper will not be published if you use this command
+% \clearpage -- No page breaks of any kind may be used for the final version of your paper
+% \columnsep -- This command may not be used
+% \newpage -- No page breaks of any kind may be used for the final version of your paper
+% \pagebreak -- No page breaks of any kind may be used for the final version of your paper
+% \pagestyle -- This command may not be used
+% \tiny -- This is not an acceptable font size.
+% \vspace{- -- No negative value may be used in proximity of a caption, figure, table, section, subsection, subsubsection, or reference
+% \vskip{- -- No negative value may be used to alter spacing above or below a caption, figure, table, section, subsection, subsubsection, or reference
+
+\setcounter{secnumdepth}{2} %May be changed to 1 or 2 if section numbers are desired.
+
+% The file aaai2027.sty is the style file for AAAI Press
+% proceedings, working notes, and technical reports.
+%
+
+% Title
+
+% Your title must be in mixed case, not sentence case.
+% That means all verbs (including short verbs like be, is, using,and go),
+% nouns, adverbs, adjectives should be capitalized, including both words in hyphenated terms, while
+% articles, conjunctions, and prepositions are lower case unless they
+% directly follow a colon or long dash
+% \title{AAAI Press Anonymous Submission\\Instructions for Authors Using \LaTeX{}}
+\title{ChainCAST: Forecasting Supply Chain Risk Signals via Reference-Relative Graph Dynamics and Prospective Semantic Distillation}
+\author{
+    %Authors
+    % All authors must be in the same font size and format.
+    Written by AAAI Press Staff\textsuperscript{\rm 1}\thanks{With help from the AAAI Publications Committee.}\\
+    AAAI Style Contributions by Peter Patel Schneider,
+    Sunil Issar,\\
+    J. Scott Penberthy,
+    George Ferguson,
+    Hans Guesgen,
+    Francisco Cruz\equalcontrib\corresponding,
+    Marc Pujol-Gonzalez\equalcontrib\corresponding
+}
+\affiliations{
+    %Afiliations
+    \textsuperscript{\rm 1}Association for the Advancement of Artificial Intelligence\\
+    % If you have multiple authors and multiple affiliations
+    % use superscripts in text and roman font to identify them.
+    % For example,
+
+    % Sunil Issar\textsuperscript{\rm 2},
+    % J. Scott Penberthy\textsuperscript{\rm 3},
+    % George Ferguson\textsuperscript{\rm 4}\corresponding,
+    % Hans Guesgen\textsuperscript{\rm 5}
+    % Note that the comma should be placed after the superscript
+
+    1101 Pennsylvania Ave, NW Suite 300\\
+    Washington, DC 20004 USA\\
+    % email address must be in roman text type, not monospace or sans serif
+    proceedings-questions@aaai.org
+%
+% See more examples next
+}
+
+%Example, Single Author, ->> remove \iffalse,\fi and place them surrounding AAAI title to use it
+\iffalse
+\title{My Publication Title --- Single Author}
+\author {
+    Author Name
+}
+\affiliations{
+    Affiliation\\
+    Affiliation Line 2\\
+    name@example.com
+}
+\fi
+
+\iffalse
+%Example, Multiple Authors, ->> remove \iffalse,\fi and place them surrounding AAAI title to use it
+\title{My Publication Title --- Multiple Authors}
+\author {
+    % Authors
+    First Author Name\textsuperscript{\rm 1,\rm 2}\equalcontrib,
+    Second Author Name\textsuperscript{\rm 2}\equalcontrib,
+    Third Author Name\textsuperscript{\rm 1}\corresponding
+}
+\affiliations {
+    % Affiliations
+    \textsuperscript{\rm 1}Affiliation 1\\
+    \textsuperscript{\rm 2}Affiliation 2\\
+    firstAuthor@affiliation1.com, secondAuthor@affilation2.com, thirdAuthor@affiliation1.com
+}
+\fi
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+News-driven forecasting of supply chain risk signals aims to predict future product-level signals from a product network and historical news. Existing propagation models mainly support ex post analysis or scenario simulation, while news-based predictors rarely transfer prospective event semantics into a network forecaster without requiring future reports at inference. We propose ChainCAST, a structural forecaster trained by a consensus-weighted prospective semantic teacher. Its structural path transforms observed news into node-level injections and evolves reference-relative states through normalized association-aware diffusion, adaptive saturating reaction, and gated temporal memory. From the same pre-target history, a frozen language model generates multiple plausible next-event hypotheses. Their semantic consensus defines a weighted distillation target for the corresponding pre-target structural state. The teacher is removed after training, so inference uses only historical news and the product graph. Provisional experiments suggest lower prediction error and higher explained variance than temporal and graph baselines; all results will be regenerated under the finalized protocol.
+\end{abstract}
+
+% Uncomment the following to link to your code, datasets, an extended version or similar.
+% You must keep this block between (not within) the abstract and the main body of the paper.
+% Make sure that you do not de-anonymize yourself with these links.
+% \begin{links}
+%     \link{Code}{https://aaai.org/example/code}
+%     \link{Datasets}{https://aaai.org/example/datasets}
+%     \link{Extended version}{https://aaai.org/example/extended-version}
+% \end{links}
+
+\section{Introduction}
+Modern production systems are organized as interconnected networks of firms and products linked through complex input-output dependencies \cite{baldwin2022risks,elliott2022supply}. While such specialization improves production efficiency, it also creates channels through which localized disruptions can propagate beyond their initial sources \cite{elliott2022supply,grossman2023resilience}. Recent empirical studies have shown that shocks may travel through both direct and indirect input--output linkages, affecting upstream suppliers and downstream producers \cite{lafrogne2023supply,demir2024financial,meier2024covid}. Such disruptions can force firms to reconsider sourcing diversification, inventory buffers, production plans, and supplier configurations \cite{grossman2023resilience,lafrogne2023supply}. Since these adjustments cannot be implemented instantaneously, identifying emerging risk tendencies before risk consequences fully materialize is essential for early warning and proactive supply chain management. Motivated by this need, we study news-driven supply chain risk forecasting, which uses a supply chain network and historical news streams to predict future product-level risk signals.
+
+Forecasting product-level supply chain risks requires modeling how news-induced disruptions alter the risk state of an affected product and how their effects subsequently spread to dependent products over time. Existing supply chain propagation studies primarily rely on observed supply relationships and predefined propagation mechanisms for ex post impact identification or scenario-based simulation \cite{carvalho2021supply,inoue2019firm,li2021ripple}. Although data-driven spatiotemporal graph models can jointly capture relational and temporal dependencies \cite{DBLP:conf/iclr/LiYS018,DBLP:conf/ijcai/YuYZ18}, their unified update rules often entangle event-induced node responses, cross-node influence, and historical state retention. This entanglement makes it difficult to explicitly characterize the distinct roles of external risk injection, local reaction, network diffusion, and temporal state transition. Differential-equation-inspired graph models provide a more explicit decomposition. GRAND interprets graph learning as a diffusion process, while GREAD introduces reaction terms to distinguish intrinsic node evolution from information exchange over the graph \cite{DBLP:conf/icml/0001RGBWR21,DBLP:conf/icml/00020PC23}. Nevertheless, these methods do not explicitly model time-varying product risk injections induced by continuously arriving news events. Relational propagation alone is also insufficient for early warning, because historical news mainly records observed developments and evolving public assessments, whereas forecasting requires a prospective representation of how ongoing events may continue. Existing event-forecasting methods use sequential models or large language models to infer plausible future events from historical observations \cite{DBLP:conf/aaai/HuLNLS17,DBLP:conf/nips/ShiXWZZZTM23,DBLP:journals/corr/abs-2407-01231}, but their outputs are generally formulated as event classes, relations, textual descriptions, or numerical sequences rather than representations explicitly aligned with product-level supply chain risk signals. These limitations leave two complementary questions unresolved: \textbf{Where may the impact propagate?} and \textbf{What may happen next?} The former concerns the temporal evolution of news-induced risk states over product dependencies, whereas the latter concerns the prospective semantic continuation of ongoing events. Moreover, answering the latter within a deployable forecaster requires transferring prospective semantics from a language model into the structural model, whereas existing language-model distillation for forecasting typically aligns the student with observed inputs or privileged future information and treats every teacher signal as equally reliable \cite{liu2025calf,liu2025timekd}.
+
+To capture these complementary aspects, we propose ChainCAST, which couples reference-relative graph dynamics with prospective semantic distillation. The structural path treats observed news as node-level injections and distinguishes adaptive local response, association-aware diffusion, and temporal memory. A frozen teacher generates multiple possible continuations of each product's pre-target event history and converts their semantic consensus into a consensus-weighted training signal. The teacher regularizes the corresponding pre-target structural state but is absent from the risk readout and from inference.
+
+Provisional experiments on a real-world news dataset suggest that ChainCAST improves prediction error and explained variance over the evaluated temporal forecasting and graph neural network baselines. Because the results must be regenerated under the finalized strict pre-target evaluation protocol, we defer definitive quantitative claims until the rerun is complete. Our main contributions are summarized as follows:
+
+\begin{itemize}
+    \item We formulate strictly pre-target, one-event-step-ahead forecasting of media-derived product risk signals over a sparse product association graph.
+    \item We develop reference-relative graph dynamics that separate news injection, normalized association-aware diffusion, adaptive saturating reaction, and gated temporal memory.
+    \item We introduce consensus-weighted prospective semantic distillation: multiple plausible next-event hypotheses supervise the structural state during training, while low hypothesis concentration reduces the auxiliary weight and the teacher is removed at inference.
+\end{itemize}
+
+
+\section{Related Works}
+
+\subsection{Risk Propagation Modeling in Supply Chains}
+
+Production-network analysis, econometric models and complex-network simulations have shown that localized disruptions can spread through direct and indirect input-output relationships \cite{acemoglu2012network,carvalho2021supply,inoue2019firm,li2021ripple}. These studies provide important evidence about where realized or prespecified shocks may propagate, but they primarily support ex post identification or scenario simulation based on observed supply relationships and predefined propagation assumptions. Recent GNN-based methods move beyond predefined propagation rules by predicting post-hazard firm outcomes or identifying firms or transaction links associated with shock transmission \cite{yang2024post,shen2026resilience}. However, they generally assume that the initial shock or affected node states are already observed. Spatiotemporal graph models learn relational and temporal dependencies from graph-structured observations \cite{DBLP:conf/iclr/LiYS018,DBLP:conf/ijcai/YuYZ18,DBLP:conf/nips/0001YL0020,chang2025learning}. Nevertheless, their unified update rules often entangle different sources of node-state variation. Differential-equation-inspired methods provide a more explicit formulation. GRAND formulates graph learning as diffusion, while GREAD separates local reaction from graph-based information exchange \cite{DBLP:conf/icml/0001RGBWR21,DBLP:conf/icml/00020PC23}. However, existing reaction-diffusion models typically assume that node states are already available. ChainCAST bridges this gap through news-conditioned temporal gated reaction-diffusion dynamics for future product-level risk-signal forecasting.
+
+\subsection{News-Driven Event Forecasting}
+
+News-driven forecasting has evolved from lexical features and sentiment scores toward structured events, domain-specific language models, and cross-document interaction modeling. Representative studies encode event participants and actions, enrich events with knowledge graphs, combine textual and numerical signals, or capture delayed interactions among news \cite{DBLP:conf/emnlp/DingZLD14,DBLP:conf/coling/DingZLD16,DBLP:conf/acl/CohenX18,DBLP:journals/corr/abs-1908-10063,DBLP:conf/emnlp/WangCM24}. Despite increasingly expressive representations, these methods mainly summarize observed news into sentiment scores, event embeddings, or latent states for direct prediction, leaving possible event continuations implicit. A complementary line of research focuses on future event forecasting. Existing studies span hierarchical event generation, language-model-based abductive reasoning, agentic forecasting benchmarks, and open-ended prediction of event trajectories from news \cite{DBLP:conf/aaai/HuLNLS17,DBLP:conf/nips/ShiXWZZZTM23,DBLP:journals/corr/abs-2407-01231,yu2025forestcast}. Existing studies typically treat predicted event categories, descriptions, or trajectories as final outputs. In contrast, ChainCAST distills the consensus of multiple prospective continuations into a separate network forecaster and discards the language-model teacher at inference.
+
+\subsection{Knowledge Distillation from Language Models}
+
+Knowledge distillation transfers the capability of a stronger teacher into a deployable student, initially by matching softened output distributions and subsequently by aligning intermediate representations through contrastive objectives \cite{hinton2015distilling,DBLP:conf/iclr/TianKI20,gou2021knowledge}. With large language models, generated text has become an additional medium of transfer: LLM-produced rationales supervise small task-specific models \cite{hsieh2023distilling}, and aggregating multiple sampled generations improves the reliability of LLM outputs \cite{wang2023selfconsistency}. A recent line of work further distills language-model knowledge into non-textual forecasters. CALF aligns a temporal branch with a textual LLM branch through cross-modal fine-tuning, while TimeKD distills a teacher conditioned on privileged ground-truth prompts, available only during training, into an efficient numerical student \cite{liu2025calf,liu2025timekd}. However, these methods align the student with the teacher's representation of observed inputs or of privileged future descriptions, and typically treat every teacher signal as equally reliable. In contrast, the teacher in ChainCAST generates multiple prospective continuations from strictly pre-target news history without accessing future observations, weights the distillation signal by the semantic consensus of these hypotheses, and regularizes the pre-target state of a graph forecaster that alone performs inference.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=1\textwidth]{Figures/fig-framework.pdf} % Reduce the figure size so that it is slightly narrower than the column.
+\caption{ChainCAST uses a structural forecasting path and a training-only semantic teacher. The structural path evolves reference-relative node states through news injection, adaptive saturating reaction, diffusion, and gated memory. The teacher summarizes multiple prospective hypotheses into a consensus-weighted semantic target for the pre-target structural state. Only the structural path is used at inference.}
+\label{fig1}
+\end{figure*}
+
+\section{Preliminaries}
+
+\subsection{Data Sources}
+\label{sec:data-sources}
+
+\paragraph{Product network.}
+We use the four-digit HS2022 release of the AI-generated Production Network (AIPNET) data pack revised on December 4, 2024 \cite{fetzer2024ai}. AIPNET represents products as Harmonized System (HS) codes and directed edges as technologically feasible input--output relationships rather than realized transaction flows. We extract a study-specific product subgraph and symmetrize its upstream--downstream edges so that latent-state information can be exchanged in both directions between production-related products. The complete extraction and symmetrization procedure is documented in Appendix~\ref{app:data}.
+
+\paragraph{News events and source articles.}
+We construct the news observations from GDELT 2.0 Event Database records and their linked source reports \cite{leetaru2013gdelt,gdelt2015eventcodebook}. GDELT provides machine-coded event attributes, including event actors and types, locations, the Goldstein scale, coverage statistics, and media tone. For each source article, we match its associated event records through \texttt{GlobalEventID} and aggregate them into a five-dimensional vector containing Goldstein scale, numbers of mentions, sources, and articles, and average tone. The article body retrieved from the associated \texttt{SOURCEURL} provides the unstructured text. Appendix~\ref{app:data} gives the feature aggregation, article selection, product mapping, and missing-value procedures.
+
+\subsection{Problem Definition}
+We index the chronologically ordered news-observation steps by \(t=1,\ldots,T\).\footnote{The index advances to the next retained observation date rather than by a fixed calendar interval; predicting the intervening waiting time is outside the task. Appendix~\ref{app:timeline} gives the construction.} At step \(t\), the observed news set is \(\mathcal N_t=\{n_{t,u}\}_{u=1}^{M_t}\), where item \(n_{t,u}\) comprises a standardized event vector \(\mathbf x^{\mathrm{evt}}_{t,u}\in\mathbb R^5\), source-article text \(c_{t,u}\), and a predefined mapping \(\pi(n_{t,u})\in\mathcal V\) to an HS4 product.
+
+Let \(\mathcal G=(\mathcal V,\mathcal E,\mathbf A,\mathbf p)\) be the symmetrized product relation graph, where \(\mathcal V=\{v_i\}_{i=1}^{N}\), \(\mathbf A\in\mathbb R^{N\times N}\) is symmetric, and \(\mathbf p=[p_1,\ldots,p_N]^\top\) contains the static IGPC node attributes. Given \(\mathcal G\) and the strictly historical observations \(\mathcal N_{<t}=(\mathcal N_1,\ldots,\mathcal N_{t-1})\), the task is to predict the next-step media-derived adverse-coverage signal for all \(N=|\mathcal V|\) products:
+
+\begin{equation}
+\widehat{\mathbf Y}_{t}
+=F_\Theta\!\left(\mathcal G,\mathcal N_{<t}\right)
+\in\mathbb R^N.
+\label{eq:problem}
+\end{equation}
+
+Here, larger \(Y_{t,i}\) indicates more adverse coverage of product \(i\). Because targets are partially observed, training and evaluation are restricted to \(\Omega_t=\{i:Y_{t,i}\text{ is observed}\}\). Appendix~\ref{app:risk-proxy} gives the exact target construction.
+
+
+
+\section{Methods}
+
+The central idea of ChainCAST is to train a deployable graph forecaster with a prospective semantic prior. As shown in Figure~\ref{fig1}, the structural path encodes historical news and evolves product states through reference-relative graph dynamics. During training, a frozen language model supplies multiple semantic views of plausible event continuations, whose consensus regularizes the corresponding pre-target structural state. Both paths are constructed exclusively from \(\mathcal N_{<t}\); neither receives \(\mathcal N_t\) when forming the pre-target state. Only the structural path is retained for forecasting.
+
+\subsection{Historical News Encoding}
+
+For report \(n_{t,u}\), we fuse its five-dimensional GDELT vector \(\mathbf x^{\mathrm{evt}}_{t,u}\) with a frozen BGE embedding of text \(c_{t,u}\). Let \(\mathcal U_{t,i}=\{u:\pi(n_{t,u})=v_i\}\) collect the reports mapped to product \(i\). Their mean representation forms the node-level news input:
+
+\begin{equation}
+\begin{aligned}
+\mathbf r_{t,u}
+&=f_{\mathrm{fuse}}\!\left(
+ [\phi_{\mathrm{evt}}(\mathbf x^{\mathrm{evt}}_{t,u})\Vert
+\phi_{\mathrm{txt}}(f_{\mathrm{BGE}}(c_{t,u}))]
+\right),\\
+\overline{\mathbf r}_{t,i}
+&=\begin{cases}
+|\mathcal U_{t,i}|^{-1}\sum_{u\in\mathcal U_{t,i}}\mathbf r_{t,u},
+&|\mathcal U_{t,i}|>0,\\
+\mathbf 0,&\text{otherwise},
+\end{cases}\\
+\mathbf R_t&=[\overline{\mathbf r}_{t,1};\ldots;\overline{\mathbf r}_{t,N}].
+\end{aligned}
+\label{eq:news-graph-encoding}
+\end{equation}
+
+where \(f_{\mathrm{BGE}}\) is the frozen text encoder, \(\phi_{\mathrm{evt}}\) and \(\phi_{\mathrm{txt}}\) are trainable event and text projectors, \(f_{\mathrm{fuse}}\) is a trainable fusion network, and \(\Vert\) denotes feature-wise concatenation. The report representation \(\mathbf r_{t,u}\) and node aggregate \(\overline{\mathbf r}_{t,i}\) lie in \(\mathbb R^{d_r}\), while \(\mathbf R_t\in\mathbb R^{N\times d_r}\) stacks the representations of all \(N\) product nodes.
+
+We use \(\delta_{t,i}=\mathbb{I}(|\mathcal U_{t,i}|>0)\) and \(\boldsymbol\delta_t=[\delta_{t,1},\ldots,\delta_{t,N}]^\top\) to distinguish observed nodes from zero-filled nodes. Appendix~\ref{app:news-encoder} gives the complete encoder.
+
+\subsection{Reference-Relative Graph Forecaster}
+
+The structural path separates enduring product heterogeneity from transient news effects. AIPNET's IGPC integrates global trade share, trade concentration, and topology-aware upstream importance \cite{fetzer2024ai}. We pass the time-invariant score \(p_i\) through a learnable map to obtain a centrality-conditioned structural anchor:
+
+\begin{equation}
+\begin{aligned}
+\mathbf h_{0,i}
+&=\sigma\!\left(
+\mathbf W_{\mathrm{init}}\log(1+p_i)+\mathbf b_{\mathrm{init}}
+\right),\\
+\mathbf H_0
+&=[\mathbf h_{0,1};\ldots;\mathbf h_{0,N}].
+\end{aligned}
+\label{eq:structural-anchor}
+\end{equation}
+
+where \(\sigma(\cdot)\) is the logistic sigmoid, \(\mathbf W_{\mathrm{init}}\in\mathbb R^{d\times1}\) and \(\mathbf b_{\mathrm{init}}\in\mathbb R^d\) are trainable initialization parameters, \(\mathbf h_{0,i}\in\mathbb R^d\) is the structural anchor of product \(i\), and \(\mathbf H_0\in\mathbb R^{N\times d}\) stacks all node anchors. The anchor encodes persistent differences in trade- and topology-informed structural importance, whereas deviations from it represent time-varying effects induced by historical news.
+
+At event step \(t\), observed reports provide a masked exogenous injection:
+
+\begin{equation}
+\mathbf Z_t
+=\operatorname{Diag}(\boldsymbol\delta_t)\phi_r(\mathbf R_t),
+\qquad
+\Delta\mathbf H_t^{\mathrm{inj}}
+=\eta\mathbf Z_t,\quad \eta>0.
+\label{eq:news-injection}
+\end{equation}
+
+where \(\phi_r:\mathbb R^{d_r}\rightarrow\mathbb R^d\) is a trainable row-wise news projector, \(\mathbf Z_t,\Delta\mathbf H_t^{\mathrm{inj}}\in\mathbb R^{N\times d}\) are the masked news state and injection increment, \(\operatorname{Diag}(\boldsymbol\delta_t)\) masks nodes without reports, and \(\eta>0\) is a trainable injection scale.
+
+Modeling deviations from \(\mathbf H_0\) lets graph exchange act on transient state rather than repeatedly smoothing the structural anchors themselves. With \(\overline{\mathbf A}=\mathbf A+\mathbf I\), \(\overline{\mathbf D}=\operatorname{Diag}(\overline{\mathbf A}\mathbf1_N)\), and \(\widetilde{\mathbf A}=\overline{\mathbf D}^{-1/2}\overline{\mathbf A}\overline{\mathbf D}^{-1/2}\), we define the normalized Laplacian \(\mathbf L=\mathbf I-\widetilde{\mathbf A}\). The diffusion increment is
+
+\begin{equation}
+\mathbf U_{t-1}=\mathbf H_{t-1}-\mathbf H_0,\qquad
+\Delta\mathbf H_t^{\mathrm{diff}}
+=-\beta\mathbf L\mathbf U_{t-1},
+\quad \beta=\sigma(\widetilde\beta)\in(0,1).
+\label{eq:diffusion}
+\end{equation}
+
+where \(\mathbf H_{t-1}\in\mathbb R^{N\times d}\) is the structural state after processing step \(t-1\), \(\mathbf U_{t-1}\in\mathbb R^{N\times d}\) is its deviation from \(\mathbf H_0\), and \(\Delta\mathbf H_t^{\mathrm{diff}}\in\mathbb R^{N\times d}\) is the graph-diffusion increment. The matrix \(\mathbf L\in\mathbb R^{N\times N}\) is the symmetric normalized Laplacian, \(\widetilde\beta\in\mathbb R\) is an unconstrained trainable scalar, and \(\beta=\sigma(\widetilde\beta)\) is its diffusion coefficient constrained to \((0,1)\).
+
+This normalized diffusion exchanges deviations between production-related products. Appendix~\ref{app:dynamics-properties} states its standard non-expansiveness property.
+
+Local response is represented by an adaptive saturating reaction. Define the feature-wise concatenation \(\mathbf Q_t=[\mathbf H_{t-1}\Vert\mathbf Z_t]\) and
+
+\begin{equation}
+\begin{aligned}
+\mathbf V_t^{\mathrm{rec}}
+&=\operatorname{softplus}(f_{\mathrm{rec}}(\mathbf Q_t))+\epsilon_{\mathrm{rec}},\\
+\Delta\mathbf H_t^{\mathrm{react}}
+&=\mathbf V_t^{\mathrm{rec}}\odot
+\tanh\!\left[
+\alpha(\mathbf H_0-\mathbf H_{t-1})
+\oslash\mathbf V_t^{\mathrm{rec}}
+\right],\quad \alpha>0.
+\end{aligned}
+\label{eq:reaction}
+\end{equation}
+
+where \(\mathbf Q_t=[\mathbf H_{t-1}\Vert\mathbf Z_t]\in\mathbb R^{N\times2d}\) is the feature-wise concatenated context and \(f_{\mathrm{rec}}:\mathbb R^{2d}\rightarrow\mathbb R^d\) is a trainable row-wise reaction network. The positive matrix \(\mathbf V_t^{\mathrm{rec}}\in\mathbb R_{>0}^{N\times d}\) gives input-dependent saturation scales, \(\epsilon_{\mathrm{rec}}>0\) is a numerical lower bound, and \(\alpha>0\) is a trainable reaction scale. The operators \(\odot\) and \(\oslash\) denote element-wise multiplication and division, respectively.
+
+For small deviations, the reference-directed reaction encodes the inductive bias that, without reinforcing news evidence, transient deviations move toward the structural anchor. The subsequent gates can preserve persistent deviations supported by the event history. For each input, \(\mathbf V_t^{\mathrm{rec}}\) sets the coordinate-wise saturation scale. Finally, gates \(\mathbf G_t^k\in(0,1)^{N\times d}\) and positive component scales \(\lambda_k>0\) combine news injection, diffusion, and reaction with temporal memory:
+
+\begin{equation}
+\begin{aligned}
+\mathbf P_t
+&=\sum_{k\in\{\mathrm{inj},\mathrm{diff},\mathrm{react}\}}
+\lambda_k\mathbf G_t^k\odot\Delta\mathbf H_t^k,\\
+(\mathbf C_t,\mathbf H_t)
+&=\operatorname{GateUpdate}_{\theta}
+(\mathbf C_{t-1},\mathbf H_{t-1},\mathbf Z_t,\mathbf P_t).
+\end{aligned}
+\label{eq:gated-update}
+\end{equation}
+
+where \(k\in\{\mathrm{inj},\mathrm{diff},\mathrm{react}\}\) indexes the three structural increments, \(\mathbf G_t^k\in(0,1)^{N\times d}\) is a trainable node- and coordinate-specific gate, and \(\lambda_k>0\) is its trainable component scale. The matrix \(\mathbf P_t\in\mathbb R^{N\times d}\) is the fused structural increment, \(\mathbf C_t\in\mathbb R^{N\times d}\) is the recurrent memory, and \(\operatorname{GateUpdate}_{\theta}\) denotes the trainable gated recurrence with parameters \(\theta\) that produces \((\mathbf C_t,\mathbf H_t)\).
+
+The memory retains persistent effects without forcing every event step to diffuse or recover equally. Appendix~\ref{app:full-dynamics} specifies adjacency normalization, component gates, and the complete recurrence; Appendix~\ref{app:reaction-properties} states the local approximation and saturation bound.
+
+\subsection{Prospective Semantic Distillation}
+
+The teacher transfers a pretrained semantic prior about how reported events may evolve. Our auxiliary objective follows contrastive representation distillation \cite{DBLP:conf/iclr/TianKI20} and, in the spirit of self-consistency \cite{wang2023selfconsistency}, weights each anchor by the agreement among multiple sampled generations. For query \((t,i)\), let \(\mathcal H_{<t,i}^{(K)}\) contain the \(K\) most recent reports mapped to product \(i\) before step \(t\). From this pre-target history, a frozen LLM independently samples \(M_{\mathrm{hyp}}\) prospective hypotheses \(\{\widehat c_{t,i}^{(m)}\}_{m=1}^{M_{\mathrm{hyp}}}\), which a frozen BGE encoder maps to normalized embeddings. We summarize their direction and concentration as
+
+\begin{equation}
+\begin{aligned}
+\mathbf e_{t,i}^{(m)}
+&=\operatorname{Norm}_2\!\left(
+f_{\mathrm{BGE}}(\widehat c_{t,i}^{(m)})
+\right),\quad m=1,\ldots,M_{\mathrm{hyp}},\\
+\overline{\mathbf e}_{t,i}
+&=\frac{1}{M_{\mathrm{hyp}}}
+\sum_{m=1}^{M_{\mathrm{hyp}}}\mathbf e_{t,i}^{(m)},\qquad
+\boldsymbol\mu_{t,i}=\operatorname{Norm}_2(\overline{\mathbf e}_{t,i}),\\
+\chi_{t,i}&=\lVert\overline{\mathbf e}_{t,i}\rVert_2,\qquad
+w_{t,i}=\exp[-\gamma(1-\chi_{t,i})],\quad \gamma\geq0.
+\end{aligned}
+\label{eq:prospective-teacher}
+\end{equation}
+
+where \(M_{\mathrm{hyp}}\) is the number of independently generated hypotheses, \(\mathbf e_{t,i}^{(m)}\in\mathbb R^{768}\) is the normalized frozen-BGE embedding of hypothesis \(m\), and \(\overline{\mathbf e}_{t,i},\boldsymbol\mu_{t,i}\in\mathbb R^{768}\) are the unnormalized mean embedding and its normalized semantic prototype. The scalar \(\chi_{t,i}\in[0,1]\) is the resultant length measuring hypothesis concentration, \(w_{t,i}\in[\exp(-\gamma),1]\) is the corresponding concentration weight, and \(\gamma\geq0\) is a validation-selected concentration-scale hyperparameter.
+
+Here, \(\operatorname{Norm}_2(\mathbf z)=\mathbf z/\max(\lVert\mathbf z\rVert_2,\epsilon_{\mathrm{norm}})\). The resultant length \(\chi_{t,i}\in[0,1]\) measures directional concentration among the normalized hypothesis embeddings. We use \(w_{t,i}\) exclusively as a concentration weight on the auxiliary distillation loss, assigning less influence to dispersed hypothesis sets.
+
+For eligible pairs, the teacher prototype and the strictly pre-target structural state are projected as \(\mathbf a_{t,i}=\operatorname{Norm}_2(g_{\mathrm{sem}}(\boldsymbol\mu_{t,i}))\) and \(\mathbf b_{t,i}=\operatorname{Norm}_2(g_{\mathrm{str}}(\mathbf h_{t-1,i}))\). The sparse scalar objective constrains the structural state only through the risk readout. PSD adds a representation-level constraint that encourages the same pre-target state to preserve the semantics of plausible event continuations, which the supervised readout can exploit when estimating the adverse-coverage signal.
+
+Let \(\mathcal P_{\mathcal S}\) contain valid teacher--student pairs in split \(\mathcal S\), and let \(\mathcal M_{t,i}\) retain the positive while masking temporally adjacent same-product instances and nearby graph nodes to reduce false negatives arising from temporal continuity and production-related products connected in the graph. With \(s_{ti,t'j}=\mathbf a_{t,i}^{\top}\mathbf b_{t',j}/\kappa\), the consensus-weighted distillation loss is
+
+\begin{equation}
+\mathcal L_{\mathrm{PSD}}^{(\mathcal S)}
+=
+-\frac{1}{\sum_{(t,i)\in\mathcal P_{\mathcal S}}w_{t,i}}
+\sum_{(t,i)\in\mathcal P_{\mathcal S}}
+w_{t,i}
+\log
+\frac{\exp(s_{ti,ti})}
+{\sum_{(t',j)\in\mathcal M_{t,i}}\exp(s_{ti,t'j})}.
+\label{eq:psd-loss}
+\end{equation}
+
+where \(\mathcal S\) denotes a data split, \(\mathcal P_{\mathcal S}\) is its set of eligible teacher--student pairs, and \(\mathcal M_{t,i}\) is the candidate set containing the positive pair and retained negatives for anchor \((t,i)\). The vectors \(\mathbf a_{t,i},\mathbf b_{t,i}\in\mathbb R^{d_{\mathrm{dist}}}\) are unit-normalized teacher and student projections in the shared distillation space, \(s_{ti,t'j}\) is their temperature-scaled cosine similarity, \(\kappa>0\) is the contrastive temperature, and \(w_{t,i}\) weights each anchor by hypothesis concentration. The scalar \(\mathcal L_{\mathrm{PSD}}^{(\mathcal S)}\) is the normalized prospective semantic distillation loss.
+
+This contrastive objective makes the deployable structural state predictive of the teacher's prospective semantic direction while reducing the influence of unstable generations. Appendix~\ref{app:hypothesis-protocol} specifies leakage-free context construction and prompt selection; Appendix~\ref{app:distillation-details} defines eligible pairs, negative masks, and edge cases.
+
+\subsection{Training and Inference}
+
+At target step \(t\), the readout uses only the pre-target state, \(\widehat Y_{t,i}=f_{\mathrm{out}}(\mathbf h_{t-1,i})\). Let \(\mathcal L_{\mathrm{sup}}^{(\mathcal S)}\) be the normalized weighted MSE over \(i\in\Omega_t\), defined in Appendix~\ref{app:distillation-details}. Training minimizes
+
+\begin{equation}
+\mathcal L_{\mathrm{total}}^{(\mathcal S)}
+=
+\mathcal L_{\mathrm{sup}}^{(\mathcal S)}
++\lambda_{\mathrm{PSD}}\mathcal L_{\mathrm{PSD}}^{(\mathcal S)},
+\qquad \lambda_{\mathrm{PSD}}\geq0.
+\label{eq:joint-objective}
+\end{equation}
+
+where \(\mathcal L_{\mathrm{sup}}^{(\mathcal S)}\) is the normalized weighted regression loss on observed targets, \(\mathcal L_{\mathrm{PSD}}^{(\mathcal S)}\) is the auxiliary semantic distillation loss, and \(\lambda_{\mathrm{PSD}}\geq0\) is a validation-selected coefficient controlling their trade-off.
+
+Optimization uses \(\mathcal S=\mathcal S_{\mathrm{train}}\), whereas model selection uses validation supervision loss. Hypotheses are generated and cached before structural-model training. At inference, the LLM, semantic encoder, and distillation projectors are discarded; forecasting requires only historical news and the product graph.
+
+\section{Experiments}
+\label{sec:experiments}
+
+\subsection{Experimental Setup}
+
+\paragraph{Data and protocol.}
+The dataset contains 246 source articles linked to GDELT events and 91 supervised product--date observations over 80 target dates. For every evaluated event step \(t\), the prediction uses only \(\mathcal N_{<t}\). We evaluate forecasting in chronological order. The last 12 dates (March 21--June 5, 2026) are held out as a common test period, while the preceding history is divided into five expanding-window folds for model selection. This design prevents future observations from entering an earlier training window and evaluates every method on the same final horizon. We report RMSE, MAE, \(R^2\), Pearson's \(r\), and Spearman's \(\rho\). Lower RMSE and MAE and higher values of the remaining metrics indicate better performance.
+
+\paragraph{Baselines.}
+We compare ChainCAST with three families of methods: (1) an LSTM \cite{hochreiter1997long}, iTransformer \cite{liu2024itransformer}, and TimesNet \cite{wu2023timesnet} as temporal forecasters; (2) GCN \cite{kipf2017semi}, GAT \cite{velickovic2018graph}, and STGCN \cite{DBLP:conf/ijcai/YuYZ18} as graph or spatio-temporal predictors; and (3) DCRNN \cite{DBLP:conf/iclr/LiYS018}, its bidirectional-diffusion variant, and AGCRN \cite{DBLP:conf/nips/0001YL0020} as graph-aware sequence models. The temporal LSTM and graph baselines receive the same aggregated historical news features as ChainCAST. iTransformer and TimesNet operate on causal risk-score histories, and AGCRN learns an adaptive adjacency matrix.
+
+\paragraph{Implementation details.}
+We encode articles with frozen BGE-base-en-v1.5 embeddings and use a five-step historical context. Prospective hypotheses are generated offline by \texttt{deepseek-v4-flash}; \(M_{\mathrm{hyp}}\), decoding configuration, consensus scale \(\gamma\), mask radii, \(\lambda_{\mathrm{PSD}}\), and \(\kappa\) will be selected using validation data. The hidden and distillation dimensions are 64; the risk readout has two layers of sizes 128 and 64 with dropout \(0.1\). Models are optimized by AdamW for at most 300 epochs with learning rate \(5\times10^{-3}\), weight decay \(10^{-4}\), gradient clipping at 5, and early stopping patience 20.
+
+\hl{TODO for the camera-ready experiment: implement the multi-hypothesis prospective teacher and consensus-weighted distillation objective; select \(M_{\mathrm{hyp}},\gamma,r_{\mathrm{time}},r_{\mathrm{graph}},\lambda_{\mathrm{PSD}}\), and \(\kappa\) on validation data; rerun all methods with strict pre-target inputs, the normalized supervision loss, and the bidirectional AIPNET graph; replace the current repeated seed-42 executions with distinct fixed seeds; and regenerate all tables from one frozen code version. The numbers below come from the previous single-hypothesis configuration and are not results for the finalized method.}
+
+\subsection{Comparison with Baselines}
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4.2pt}
+\begin{tabular}{llccccc}
+\toprule
+Method & Main input / graph & RMSE \(\downarrow\) & MAE \(\downarrow\) & \(R^2\) \(\uparrow\) & Pearson \(\uparrow\) & Spearman \(\uparrow\) \\
+\midrule
+LSTM & News & \(1.609{\pm}0.028\) & \(1.378{\pm}0.025\) & \(0.672{\pm}0.011\) & \(\mathbf{0.931}{\pm}0.001\) & \(\mathbf{0.952}{\pm}0.001\) \\
+iTransformer & Risk history & \(2.828{\pm}0.000\) & \(2.220{\pm}0.000\) & \(0.046{\pm}0.000\) & \(0.553{\pm}0.000\) & \(0.586{\pm}0.000\) \\
+TimesNet & Risk history & \(2.828{\pm}0.000\) & \(2.210{\pm}0.000\) & \(0.047{\pm}0.000\) & \(0.328{\pm}0.000\) & \(0.498{\pm}0.000\) \\
+GCN & News / AIPNET & \(2.391{\pm}0.003\) & \(2.035{\pm}0.002\) & \(0.239{\pm}0.001\) & \(0.759{\pm}0.000\) & \(0.839{\pm}0.001\) \\
+GAT & News / AIPNET & \(2.208{\pm}0.118\) & \(1.779{\pm}0.107\) & \(0.329{\pm}0.058\) & \(0.814{\pm}0.019\) & \(0.807{\pm}0.027\) \\
+STGCN & News / AIPNET & \(2.718{\pm}0.000\) & \(2.270{\pm}0.000\) & \(0.023{\pm}0.000\) & \(0.585{\pm}0.000\) & \(0.678{\pm}0.000\) \\
+DCRNN & News / AIPNET & \(2.166{\pm}0.000\) & \(1.759{\pm}0.000\) & \(0.372{\pm}0.000\) & \(0.573{\pm}0.000\) & \(0.587{\pm}0.000\) \\
+Bi-DCRNN & News / AIPNET & \(2.253{\pm}0.000\) & \(1.833{\pm}0.000\) & \(0.335{\pm}0.000\) & \(0.548{\pm}0.000\) & \(0.566{\pm}0.000\) \\
+AGCRN & News / adaptive & \(2.161{\pm}0.000\) & \(1.766{\pm}0.001\) & \(0.407{\pm}0.000\) & \(0.803{\pm}0.000\) & \(0.717{\pm}0.000\) \\
+\midrule
+ChainCAST & News / AIPNET & \(\mathbf{1.326}{\pm}0.050\) & \(\mathbf{1.109}{\pm}0.036\) & \(\mathbf{0.764}{\pm}0.020\) & \(0.921{\pm}0.003\) & \(0.928{\pm}0.001\) \\
+\bottomrule
+\end{tabular}
+\caption{Provisional results on the common chronological test period. Each entry is the mean \(\pm\) standard deviation over five repeated executions. Bold denotes the best mean.}
+\label{tab:main-results}
+\end{table*}
+
+Under the provisional results in Table~\ref{tab:main-results}, ChainCAST obtains the lowest prediction errors and the highest \(R^2\). Relative to LSTM, the strongest error-based baseline in this table, the provisional reductions are \(17.6\%\) in RMSE and \(19.5\%\) in MAE, with an absolute \(R^2\) gain of \(0.092\). Generic graph models do not automatically outperform the temporal LSTM, suggesting that simply attaching the product graph is insufficient under sparse supervision. ChainCAST instead constrains graph exchange through explicit reaction, diffusion, and temporal gating. However, LSTM retains the best Pearson and Spearman correlations. These observations are descriptive rather than final until every method is rerun under the finalized protocol.
+
+\subsection{Ablation Study}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lccc}
+\toprule
+Variant & RMSE \(\downarrow\) & MAE \(\downarrow\) & \(R^2\) \(\uparrow\) \\
+\midrule
+ChainCAST & \(\mathbf{1.326}{\pm}0.050\) & \(\mathbf{1.109}{\pm}0.036\) & \(\mathbf{0.764}{\pm}0.020\) \\
+w/o prospective teacher & \(1.407{\pm}0.014\) & \(1.138{\pm}0.013\) & \(0.714{\pm}0.003\) \\
+w/o diffusion & \(1.527{\pm}0.032\) & \(1.311{\pm}0.034\) & \(0.709{\pm}0.012\) \\
+w/o reaction/recovery & \(1.908{\pm}0.059\) & \(1.620{\pm}0.049\) & \(0.444{\pm}0.025\) \\
+Two-hop diffusion & \(1.480{\pm}0.000\) & \(1.258{\pm}0.000\) & \(0.719{\pm}0.000\) \\
+\bottomrule
+\end{tabular}
+\caption{Provisional ablation results on the test period.}
+\label{tab:ablation}
+\end{table}
+
+In the previous single-hypothesis configuration, removing the prospective teacher increases RMSE by \(6.1\%\). Suppressing diffusion increases RMSE by \(15.2\%\), while removing the reaction/recovery mechanism causes the largest degradation (\(43.9\%\)). These legacy observations motivate the finalized components but do not validate consensus-weighted distillation; all ablations must be rerun.
+
+\subsection{Distillation Hyperparameters}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{ccc@{\hspace{8pt}}ccc}
+\toprule
+\(\lambda_{\mathrm{PSD}}\) & RMSE & \(R^2\) & \(\kappa\) & RMSE & \(R^2\) \\
+\midrule
+0.00 & 1.407 & 0.714 & 0.03 & \textbf{1.307} & \textbf{0.773} \\
+0.10 & 1.686 & 0.628 & 0.05 & 1.643 & 0.664 \\
+0.20 & \textbf{1.353} & \textbf{0.762} & 0.07 & 1.428 & 0.714 \\
+0.30 & 1.788 & 0.559 & 0.10 & 1.526 & 0.698 \\
+0.40 & 1.378 & 0.750 & 0.15 & 1.511 & 0.701 \\
+0.50 & 1.421 & 0.755 & 0.20 & 1.587 & 0.691 \\
+0.60 & 1.669 & 0.663 & 0.30 & 1.437 & 0.724 \\
+0.70 & 1.501 & 0.724 & 0.50 & 1.453 & 0.720 \\
+0.75 & 1.480 & 0.722 & & & \\
+0.80 & 1.550 & 0.692 & & & \\
+0.90 & 1.635 & 0.669 & & & \\
+1.00 & 1.708 & 0.629 & & & \\
+\bottomrule
+\end{tabular}
+\caption{Legacy sensitivity to auxiliary-loss weight (left) and temperature (right) under the previous single-hypothesis configuration. These values do not evaluate the finalized consensus-weighted objective.}
+\label{tab:contrastive-hparams}
+\end{table}
+
+The legacy auxiliary-weight curve is non-monotonic and the previous temperature sweep favors \(0.03\), but neither sweep includes multiple hypotheses, consensus weighting, or masked negatives. The finalized study must select all distillation hyperparameters using validation data only and evaluate the held-out test period once.
+
+\section{Conclusion}
+
+
+
+\appendix
+\section{Complete Method Specification}
+
+\subsection{News Encoder and Node Aggregation}
+\label{app:news-encoder}
+
+For each report \(n_{t,u}\), the historical text branch uses the frozen BGE-base-en-v1.5 encoder:
+
+\begin{equation}
+\mathbf x^{\mathrm{txt}}_{t,u}
+=f_{\mathrm{BGE}}(c_{t,u})
+=\operatorname{Norm}_2\!\left[
+\mathbf h_{\mathrm{CLS}}\!\left(
+\operatorname{BGE}_{\leq512}(c_{t,u})
+\right)\right]
+\in\mathbb R^{768},
+\label{eq:app-text-encoding}
+\end{equation}
+
+where \(c_{t,u}\) is the source text of report \(u\) at step \(t\), \(\operatorname{BGE}_{\leq512}\) is the frozen BGE-base-en-v1.5 encoder applied to at most 512 tokens, and \(\mathbf h_{\mathrm{CLS}}\) extracts its \(\mathrm{CLS}\)-token hidden state. The vector \(\mathbf x^{\mathrm{txt}}_{t,u}\in\mathbb R^{768}\) is the resulting unit-normalized text embedding, and \(\epsilon_{\mathrm{norm}}>0\) prevents division by zero.
+
+where \(\operatorname{Norm}_2(\mathbf z)=\mathbf z/\max(\lVert\mathbf z\rVert_2,\epsilon_{\mathrm{norm}})\). The structured and textual inputs are projected and fused:
+
+\begin{equation}
+\begin{aligned}
+\mathbf h^{\mathrm{evt}}_{t,u}
+&=\phi_{\mathrm{evt}}(\mathbf x^{\mathrm{evt}}_{t,u}),&
+\mathbf h^{\mathrm{txt}}_{t,u}
+&=\phi_{\mathrm{txt}}(\mathbf x^{\mathrm{txt}}_{t,u}),\\
+\mathbf r_{t,u}
+&=f_{\mathrm{fuse}}(
+ [\mathbf h^{\mathrm{evt}}_{t,u}\Vert
+\mathbf h^{\mathrm{txt}}_{t,u}])
+\in\mathbb R^{d_r}.
+\end{aligned}
+\label{eq:app-news-fusion}
+\end{equation}
+
+where \(\mathbf x^{\mathrm{evt}}_{t,u}\in\mathbb R^5\) and \(\mathbf x^{\mathrm{txt}}_{t,u}\in\mathbb R^{768}\) are the structured-event and frozen-text inputs. The trainable projectors \(\phi_{\mathrm{evt}}\) and \(\phi_{\mathrm{txt}}\) produce \(\mathbf h^{\mathrm{evt}}_{t,u}\in\mathbb R^{d_{\mathrm{evt}}}\) and \(\mathbf h^{\mathrm{txt}}_{t,u}\in\mathbb R^{d_{\mathrm{txt}}}\), \(f_{\mathrm{fuse}}:\mathbb R^{d_{\mathrm{evt}}+d_{\mathrm{txt}}}\rightarrow\mathbb R^{d_r}\) is the trainable fusion network, and \(\mathbf r_{t,u}\in\mathbb R^{d_r}\) is the fused report representation.
+
+Both projectors use a linear layer, layer normalization, GELU, and training-only dropout. Let \(M_{t,i}=|\mathcal U_{t,i}|\). The node representation and presence indicator are
+
+\begin{equation}
+\overline{\mathbf r}_{t,i}
+=
+\begin{cases}
+M_{t,i}^{-1}\sum_{u\in\mathcal U_{t,i}}\mathbf r_{t,u},
+&M_{t,i}>0,\\
+\mathbf 0,&M_{t,i}=0,
+\end{cases}
+\qquad
+\delta_{t,i}=\mathbb{I}(M_{t,i}>0).
+\label{eq:app-node-aggregation}
+\end{equation}
+
+where \(M_{t,i}=|\mathcal U_{t,i}|\) is the number of reports mapped to product \(i\) at step \(t\), \(\overline{\mathbf r}_{t,i}\in\mathbb R^{d_r}\) is their mean fused representation, and \(\delta_{t,i}\in\{0,1\}\) indicates whether at least one such report is observed. The zero vector is used when \(M_{t,i}=0\).
+
+Stacking the rows gives \(\mathbf R_t\in\mathbb R^{N\times d_r}\). The vector \(\boldsymbol\delta_t=[\delta_{t,1},\ldots,\delta_{t,N}]^\top\) is broadcast along the feature dimension.
+
+\subsection{Full Graph-Dynamics Parameterization}
+\label{app:full-dynamics}
+
+The initialization parameters satisfy \(\mathbf W_{\mathrm{init}}\in\mathbb R^{d\times1}\) and \(\mathbf b_{\mathrm{init}}\in\mathbb R^d\), and \(\mathbf C_0=\mathbf H_0\). The projected news state and positive injection scale are
+
+\begin{equation}
+\mathbf Z_t=\operatorname{Diag}(\boldsymbol\delta_t)\phi_r(\mathbf R_t),
+\qquad
+\Delta\mathbf H_t^{\mathrm{inj}}=\eta\mathbf Z_t,
+\qquad
+\eta=\operatorname{softplus}(\widetilde\eta)>0.
+\label{eq:app-injection}
+\end{equation}
+
+where \(\phi_r:\mathbb R^{d_r}\rightarrow\mathbb R^d\) is a trainable row-wise projector, \(\operatorname{Diag}(\boldsymbol\delta_t)\in\mathbb R^{N\times N}\) masks unobserved nodes, and \(\mathbf Z_t,\Delta\mathbf H_t^{\mathrm{inj}}\in\mathbb R^{N\times d}\) are the projected news state and injection increment. The unconstrained trainable scalar \(\widetilde\eta\in\mathbb R\) is mapped by softplus to the positive injection scale \(\eta\).
+
+For the symmetric AIPNET adjacency, define
+
+\begin{equation}
+\overline{\mathbf A}=\mathbf A+\mathbf I,\qquad
+\overline{\mathbf D}
+=\operatorname{Diag}(\overline{\mathbf A}\mathbf1_N),\qquad
+\widetilde{\mathbf A}
+=\overline{\mathbf D}^{-1/2}
+\overline{\mathbf A}
+\overline{\mathbf D}^{-1/2},
+\qquad
+\mathbf L=\mathbf I-\widetilde{\mathbf A}.
+\label{eq:app-adjacency-normalization}
+\end{equation}
+
+where \(\mathbf A\in\mathbb R^{N\times N}\) is the symmetric product adjacency, \(\mathbf I\in\mathbb R^{N\times N}\) adds self-loops, and \(\mathbf1_N\in\mathbb R^N\) is the all-ones vector. The diagonal matrix \(\overline{\mathbf D}\) contains self-loop-augmented node degrees, \(\widetilde{\mathbf A}\in\mathbb R^{N\times N}\) is the symmetrically normalized adjacency, and \(\mathbf L\in\mathbb R^{N\times N}\) is the corresponding normalized Laplacian.
+
+The node-wise diffusion increment is
+
+\begin{equation}
+\Delta\mathbf h_{t,i}^{\mathrm{diff}}
+=
+\beta\left[
+\sum_{j=1}^{N}\widetilde A_{ij}
+(\mathbf h_{t-1,j}-\mathbf h_{0,j})
+-(\mathbf h_{t-1,i}-\mathbf h_{0,i})
+\right],
+\qquad
+\beta=\sigma(\widetilde\beta)\in(0,1).
+\label{eq:app-node-diffusion}
+\end{equation}
+
+where \(\Delta\mathbf h_{t,i}^{\mathrm{diff}}\in\mathbb R^d\) is the diffusion increment for node \(i\), \(\widetilde A_{ij}\) is the normalized weight from product \(j\) to product \(i\), and \(\mathbf h_{t-1,j}-\mathbf h_{0,j}\) is node \(j\)'s reference-relative deviation. The trainable scalar \(\widetilde\beta\in\mathbb R\) is transformed by the logistic sigmoid into \(\beta\in(0,1)\).
+
+For \(a\in\{\mathrm{fgt},\mathrm{in},\mathrm{out},\mathrm{inj},\mathrm{react},\mathrm{diff},\mathrm{fus}\}\), the gates and candidate memory are
+
+\begin{equation}
+\mathbf G_t^a
+=\sigma(\mathbf Q_t\mathbf W_a+\mathbf1_N\mathbf b_a^\top),
+\qquad
+\widetilde{\mathbf C}_t
+=\tanh(\mathbf Q_t\mathbf W_c+\mathbf1_N\mathbf b_c^\top),
+\label{eq:app-gate-parameterization}
+\end{equation}
+
+where \(a\) indexes the forget, input, output, injection, reaction, diffusion, and fusion gates; \(\mathbf Q_t\in\mathbb R^{N\times2d}\) is the concatenated structural-news context; and \(\mathbf G_t^a\in(0,1)^{N\times d}\) is the corresponding gate matrix. The trainable parameters are \(\mathbf W_a,\mathbf W_c\in\mathbb R^{2d\times d}\) and \(\mathbf b_a,\mathbf b_c\in\mathbb R^d\), while \(\widetilde{\mathbf C}_t\in(-1,1)^{N\times d}\) is the candidate memory.
+
+where \(\mathbf Q_t=[\mathbf H_{t-1}\Vert\mathbf Z_t]\), \(\mathbf W_a,\mathbf W_c\in\mathbb R^{2d\times d}\), and \(\mathbf b_a,\mathbf b_c\in\mathbb R^d\). Component scales use \(\lambda_k=\operatorname{softplus}(\rho_k)>0\). The complete recurrence represented by \(\operatorname{GateUpdate}_{\theta}\) in Eq.~\ref{eq:gated-update} is
+
+\begin{equation}
+\begin{aligned}
+\mathbf P_t
+&=\sum_{k\in\{\mathrm{inj},\mathrm{diff},\mathrm{react}\}}
+\lambda_k\mathbf G_t^k\odot\Delta\mathbf H_t^k,\\
+\mathbf C_t
+&=\mathbf G_t^{\mathrm{fgt}}\odot\mathbf C_{t-1}
++\mathbf G_t^{\mathrm{in}}\odot\widetilde{\mathbf C}_t
++\mathbf G_t^{\mathrm{fus}}\odot\mathbf P_t,\\
+\mathbf H_t&=\mathbf G_t^{\mathrm{out}}\odot\tanh(\mathbf C_t).
+\end{aligned}
+\label{eq:app-full-gated-update}
+\end{equation}
+
+where \(k\in\{\mathrm{inj},\mathrm{diff},\mathrm{react}\}\) indexes the structural increments, \(\rho_k\in\mathbb R\) is an unconstrained trainable scalar, and \(\lambda_k=\operatorname{softplus}(\rho_k)>0\) is its positive component scale. The matrices \(\mathbf P_t,\mathbf C_t,\mathbf H_t\in\mathbb R^{N\times d}\) are the fused increment, recurrent memory, and updated structural state, respectively; \(\odot\) denotes element-wise multiplication.
+
+Dropout follows the output gate during training and is disabled at inference. Latent coordinate signs are not interpreted as the polarity of \(Y_{t,i}\).
+
+\subsection{Properties of the Structured Dynamics}
+\label{app:dynamics-properties}
+
+Because the graph is symmetric, the normalized Laplacian \(\mathbf L\) is positive semidefinite with eigenvalues in \([0,2]\). For \(\beta\in[0,1]\), every eigenvalue of \(\mathbf I-\beta\mathbf L\) lies in \([-1,1]\). Therefore,
+
+\begin{equation}
+\left\|
+(\mathbf I-\beta\mathbf L)\mathbf U
+\right\|_F
+\leq
+\|\mathbf U\|_F.
+\label{eq:app-diffusion-nonexpansive}
+\end{equation}
+
+where \(\mathbf U\in\mathbb R^{N\times d}\) is an arbitrary reference-relative state matrix, \(\mathbf I-\beta\mathbf L\) is the isolated diffusion operator, and \(\|\cdot\|_F\) denotes the Frobenius norm. The inequality states that this operator cannot increase that norm for \(\beta\in[0,1]\).
+
+This result applies to the isolated diffusion map; it does not establish global contraction of the full gated model.
+
+\subsection{Properties of the Adaptive Saturating Reaction}
+\label{app:reaction-properties}
+
+The recovery bound is strictly positive because \(\mathbf V_t^{\mathrm{rec}}=\operatorname{softplus}(f_{\mathrm{rec}}(\mathbf Q_t))+\epsilon_{\mathrm{rec}}\), with \(\epsilon_{\mathrm{rec}}>0\), while \(\alpha=\operatorname{softplus}(\widetilde\alpha)>0\). For small normalized deviations, \(\tanh(x)\approx x\), yielding
+
+\begin{equation}
+\Delta\mathbf H_t^{\mathrm{react}}
+\approx
+\alpha(\mathbf H_0-\mathbf H_{t-1}).
+\label{eq:app-linearized-reaction}
+\end{equation}
+
+where \(\Delta\mathbf H_t^{\mathrm{react}}\in\mathbb R^{N\times d}\) is the reaction increment, \(\alpha>0\) is the trainable reaction scale, and \(\mathbf H_0-\mathbf H_{t-1}\) is the displacement toward the structural anchor. The approximation follows from \(\tanh(x)\approx x\) near zero.
+
+Since \(|\tanh(x)|\leq1\), every coordinate satisfies
+
+\begin{equation}
+\left|
+\Delta H_{t,im}^{\mathrm{react}}
+\right|
+\leq V_{t,im}^{\mathrm{rec}},
+\qquad i=1,\ldots,N,\quad m=1,\ldots,d.
+\label{eq:app-reaction-bound}
+\end{equation}
+
+where \(\Delta H_{t,im}^{\mathrm{react}}\) and \(V_{t,im}^{\mathrm{rec}}\) are the \((i,m)\)-th entries of the reaction increment and saturation-scale matrices, \(i\) indexes the \(N\) product nodes, and \(m\) indexes the \(d\) latent coordinates. The inequality is an input-dependent coordinate-wise bound.
+
+Thus, \(\mathbf V_t^{\mathrm{rec}}\) supplies an input-dependent saturation scale. Because this scale is learned and not globally bounded, the result is a coordinate-wise property of the reaction term rather than a global stability guarantee.
+
+\subsection{Prospective Hypothesis Construction}
+\label{app:hypothesis-protocol}
+
+Let \(\mathcal I_{<t,i}=\{(t',u):t'<t,\ \pi(n_{t',u})=v_i\}\) be ordered first by \(t'\) and then by the within-step report index. The pre-target context is the last \(K\) elements:
+
+\begin{equation}
+\mathcal H_{<t,i}^{(K)}
+=
+\operatorname{Tail}_K
+\left[
+(n_{t',u})_{(t',u)\in\mathcal I_{<t,i}}
+\right].
+\label{eq:app-event-history}
+\end{equation}
+
+where \(\mathcal I_{<t,i}\) is the chronologically ordered index set of reports mapped to product \(i\) before step \(t\), \(\operatorname{Tail}_K[\cdot]\) retains at most the \(K\) most recent elements, and \(\mathcal H_{<t,i}^{(K)}\) is the resulting strictly pre-target report sequence. The hyperparameter \(K\) controls the context length.
+
+Each retained report is compressed independently:
+
+\begin{equation}
+\widetilde c_{t',u}^{\,i}
+=
+G_{\mathrm{LLM}}\!\left(
+P_{\mathrm{comp}}[
+v_i,\xi_{t'},n_{t',u}]
+\right).
+\label{eq:app-history-compression}
+\end{equation}
+
+where \(G_{\mathrm{LLM}}\) is the frozen language model, \(P_{\mathrm{comp}}\) is the fixed report-compression prompt template, \(v_i\) identifies the target HS4 product, \(\xi_{t'}\) is the report date, and \(n_{t',u}\) is the source report. The output \(\widetilde c_{t',u}^{\,i}\) is the product-conditioned compressed text used to construct the prospective context.
+
+The prompt receives product and HS4 information, date, headline, and body, and preserves reported actors, actions, policies, causal statements, and supply-chain-relevant consequences. The dated summaries retain report boundaries and event order. Given this fixed pre-target context, the \(m\)-th stochastic decode is
+
+\begin{equation}
+\widehat c_{t,i}^{(m)}
+=G_{\mathrm{LLM}}\!\left(
+P_{\mathrm{pre}}[v_i,\mathcal H_{<t,i}^{(K)}];z_m
+\right),
+\qquad m=1,\ldots,M_{\mathrm{hyp}},
+\label{eq:app-prospective-generation}
+\end{equation}
+
+where \(P_{\mathrm{pre}}\) is the fixed prospective-generation prompt, \(z_m\) is the independent stochastic decoding seed for hypothesis \(m\), and \(M_{\mathrm{hyp}}\) is the number of generated hypotheses. The output \(\widehat c_{t,i}^{(m)}\) is the \(m\)-th prospective text generated for product \(i\) from \(\mathcal H_{<t,i}^{(K)}\).
+
+where \(z_m\) denotes an independent decoding seed. The resulting hypotheses are embedded and aggregated as in Eq.~\ref{eq:prospective-teacher}.
+
+All hypothesis embeddings are normalized before averaging. A pair is ineligible when \(\|\overline{\mathbf e}_{t,i}\|_2\leq\epsilon_{\mathrm{norm}}\). For every eligible pair, \(\|\boldsymbol\mu_{t,i}\|_2=\|\mathbf e_{t,i}^{(m)}\|_2=1\), while the resultant length \(\chi_{t,i}=\|\overline{\mathbf e}_{t,i}\|_2\in(0,1]\) measures directional agreement. Consequently, \(w_{t,i}\in[\exp(-\gamma),1]\) is fixed with respect to structural-model training.
+
+The compression and generation prompts are developed without test reports. If a feedback procedure is used, it may inspect target reports only for training examples and returns general prompt guidance rather than sample-specific text. Validation supervision may select among a prespecified finite set of prompt versions; the selected prompt, \(M_{\mathrm{hyp}}\), decoding configuration, LLM, and BGE encoder are then frozen. Generated hypotheses and embeddings are cached before training the structural model.
+
+\subsection{Distillation Pairs, Negative Mask, and Edge Cases}
+\label{app:distillation-details}
+
+For target step \(t\), the structural readout is \(\widehat Y_{t,i}=f_{\mathrm{out}}(\mathbf h_{t-1,i})\). Given nonnegative supervision weights \(q_{t,i}\), the normalized loss over observed targets is
+
+\begin{equation}
+\mathcal L_{\mathrm{sup}}^{(\mathcal S)}
+=
+\frac{\sum_{t\in\mathcal S}\sum_{i\in\Omega_t}
+q_{t,i}(\widehat Y_{t,i}-Y_{t,i})^2}
+{\sum_{t\in\mathcal S}\sum_{i\in\Omega_t}q_{t,i}}.
+\label{eq:supervised-loss}
+\end{equation}
+
+where \(\mathcal S\) is a chronological data split, \(\Omega_t\) is the set of products with observed targets at step \(t\), and \(q_{t,i}\geq0\) is the supervision weight for pair \((t,i)\). The scalars \(Y_{t,i}\) and \(\widehat Y_{t,i}\) are the observed adverse-coverage signal and its pre-target prediction, and the denominator normalizes the weighted squared error over all observed pairs in \(\mathcal S\).
+
+For split \(\mathcal S\), first define the candidate teacher--student pairs
+
+\begin{equation}
+\widetilde{\mathcal P}_{\mathcal S}
+=
+\{(t,i):t\in\mathcal S,\ i\in\Omega_t,\
+|\mathcal H_{<t,i}^{(K)}|>0\}.
+\label{eq:app-distillation-pairs}
+\end{equation}
+
+where \(\widetilde{\mathcal P}_{\mathcal S}\) is the candidate pair set, \(t\in\mathcal S\) restricts the pair to the selected split, \(i\in\Omega_t\) requires an observed target, and \(|\mathcal H_{<t,i}^{(K)}|>0\) requires at least one pre-target report for semantic-teacher construction.
+
+Let \(d_{\mathcal G}(i,j)\) be shortest-path distance in the undirected association graph, \(r_{\mathrm{time}}\geq0\) a temporal exclusion radius, and \(r_{\mathrm{graph}}\geq0\) a graph exclusion radius. The candidate set includes the positive and excludes obvious false negatives:
+
+\begin{equation}
+\begin{aligned}
+\mathcal M_{t,i}
+=\{(t,i)\}\cup
+\big\{(t',j)\in\widetilde{\mathcal P}_{\mathcal S}\setminus\{(t,i)\}:\
+&\neg(i=j\land |t-t'|\leq r_{\mathrm{time}}),\\
+&\neg(i\neq j\land d_{\mathcal G}(i,j)\leq r_{\mathrm{graph}})
+\big\}.
+\end{aligned}
+\label{eq:app-negative-mask}
+\end{equation}
+
+where \(\mathcal M_{t,i}\) is the contrastive candidate set for anchor \((t,i)\), \((t,i)\) is its positive pair, and \((t',j)\) denotes a candidate negative from \(\widetilde{\mathcal P}_{\mathcal S}\). The radius \(r_{\mathrm{time}}\) excludes temporally adjacent instances of the same product, \(r_{\mathrm{graph}}\) excludes nearby but production-related products according to \(d_{\mathcal G}\), and \(\neg\), \(\land\), and \(\cup\) denote logical negation, conjunction, and set union.
+
+The set used by Eq.~\ref{eq:psd-loss} is
+
+\begin{equation}
+\mathcal P_{\mathcal S}
+=
+\left\{
+(t,i)\in\widetilde{\mathcal P}_{\mathcal S}:
+\left\|\overline{\mathbf e}_{t,i}\right\|_2
+>\epsilon_{\mathrm{norm}},
+\ |\mathcal M_{t,i}|\geq2
+\right\}.
+\label{eq:app-eligible-distillation-pairs}
+\end{equation}
+
+where \(\mathcal P_{\mathcal S}\subseteq\widetilde{\mathcal P}_{\mathcal S}\) is the final eligible pair set, \(\overline{\mathbf e}_{t,i}\) is the mean hypothesis embedding, and \(\epsilon_{\mathrm{norm}}>0\) excludes degenerate semantic prototypes. The requirement \(|\mathcal M_{t,i}|\geq2\) ensures that each retained anchor has its positive and at least one negative.
+
+Setting \(r_{\mathrm{time}}=r_{\mathrm{graph}}=0\) recovers standard instance-discrimination negatives except for duplicate instances. The radii are fixed using training/validation data only. If no eligible pair remains, \(\mathcal L_{\mathrm{PSD}}^{(\mathcal S)}=0\). The supervised loss is evaluated only when its denominator is positive.
+
+The prospective teacher remains frozen. Trainable components are the news encoder projections, structured dynamics, risk readout, and two distillation projectors. Optimization uses the training split, and model selection minimizes \(\mathcal L_{\mathrm{sup}}^{(\mathrm{val})}\), not the auxiliary distillation loss.
+
+\section{Data Construction and Preprocessing}
+\label{app:data}
+
+\subsection{AIPNET Product Graph}
+
+We use \texttt{AIPNET\_Data\_Pack\_20241204.xlsx}, whose guide identifies the release as revised on December 4, 2024. The workbook provides AIPNET edge lists at both six- and four-digit HS granularities for the HS2002, HS2007, HS2012, HS2017, and HS2022 classifications. We use the sheet \texttt{3e. 4-digit HS22}, which contains 39,634 directed upstream--downstream product relations. In AIPNET, an edge represents a technologically feasible production relation; it should not be interpreted as an observed transaction, trade flow, or firm-level supply contract \cite{fetzer2024ai}.
+
+The study-specific edge file contains 36,063 unique directed AIPNET relations. Its endpoints define 1,107 HS4 nodes; the accompanying metadata table contains 1,204 candidate HS4 products, and products that do not occur in the retained edge list are excluded from the operational graph. \hl{TODO: describe the exact criterion used to extract the 36,063-edge study subgraph from the complete 39,634-edge HS2022 network.}
+
+For every retained AIPNET relation from an upstream product \(v_j\) to a downstream product \(v_i\), we add both \(j\!\rightarrow\! i\) and \(i\!\rightarrow\! j\) to the propagation graph. After merging repeated orientations, the graph contains 34,213 bidirectional product pairs. The adjacency layout follows \(A_{ij}>0\) for information exchange from source \(v_j\) to target \(v_i\). If both orientations are already present in the original edge list, their contributions are accumulated in the symmetric adjacency weight. Self-loops and degree normalization are subsequently applied as defined in the reaction--diffusion module.
+
+The resulting graph is used as a relational structure for message passing. Neither the original AIPNET directions nor their symmetrized form provide causal identification of risk transmission.
+
+\hl{TODO: set the experiment configuration to bidirectional propagation and rerun every graph-based result; the current default configuration uses downstream-to-upstream propagation only.}
+
+The node-specific structural anchor uses the Integrated Global Product Centrality (IGPC) field supplied with the AIPNET data pack \cite{fetzer2024ai}. AIPNET first defines the intrinsic importance of product \(i\) as
+
+\begin{equation}
+b_i=\mathrm{TC}_i^{\alpha}\mathrm{GTS}_i^{\beta},
+\label{eq:app-aipnet-intrinsic-importance}
+\end{equation}
+
+where Global Trade Share \(\mathrm{GTS}_i\) captures the product's share of global trade, Trade Concentration \(\mathrm{TC}_i\) captures the geographic concentration of that trade, and \(\alpha,\beta\) control their relative contributions. It then integrates this intrinsic importance with the production-network topology:
+
+\begin{equation}
+\mathbf s_{\mathrm{IGPC}}
+=(1-d)\mathbf b
++d\mathbf A_{\mathrm{AIPNET}}\mathbf W\mathbf s_{\mathrm{IGPC}},
+\label{eq:app-igpc}
+\end{equation}
+
+where \(d\) is the propagation coefficient, \(\mathbf A_{\mathrm{AIPNET}}\) is the original AIPNET product-relation matrix, and \(\mathbf W\) introduces trade-based weights. Thus, IGPC combines trade scale, supply concentration, and topology-aware upstream importance. We use \(p_i=s_{\mathrm{IGPC},i}\) as the time-invariant scalar input to the learned structural-anchor map. The distributed node file containing IGPC is based on the HS2002 classification, whereas the propagation edges used here follow HS2022. \hl{TODO: document how the local one-row-per-HS4 metadata file was aggregated and aligned across the HS2002 and HS2022 classifications, including the treatment of code revisions and unmatched products.}
+
+\subsection{GDELT Records and Source-Article Matching}
+
+We use GDELT 2.0 Event Database exports, whose event records contain 58 fields describing actors, CAMEO event types, locations, event intensity, media coverage, tone, and the URL of an associated source report \cite{leetaru2013gdelt,gdelt2015eventcodebook}. GDELT does not provide the complete article body as a field in an Event record. We therefore use \texttt{SOURCEURL} to retrieve an accessible source report and retain its title and body as the unstructured news input. Each collected article stores one or more \texttt{GlobalEventID} values, which are used to match it back to the corresponding event records.
+
+The current corpus contains 246 source articles across two study themes: 54 Automaker articles on 41 dates and 192 Nexperia articles on 50 dates. The observations span September 26, 2025 to June 5, 2026. \hl{TODO: report the original GDELT query terms, language and geographic filters, download procedure, article-retrieval success rate, and duplicate-removal rules.}
+
+\subsection{Observation Timeline and Task Scope}
+\label{app:timeline}
+
+Let \(\xi_1<\cdots<\xi_T\) be the distinct dates represented by the retained corpus after filtering and product mapping, and let \(\mathcal N_t\) contain the mapped reports dated \(\xi_t\). Consecutive indices can therefore be separated by unequal calendar intervals. At step \(t\), the predictor uses only \(\mathcal N_{<t}\) and produces the signal associated with the next retained observation step. The model does not output the interval \(\xi_t-\xi_{t-1}\) or an occurrence date; fixed-horizon calendar-time forecasting is a separate task.
+
+\subsection{Structured Event Aggregation}
+
+Let \(\mathcal E(n)\) be the set of valid GDELT event records matched to source article \(n\). For a scalar event field \(z_e\), define the signed absolute maximum as
+
+\begin{equation}
+\operatorname{sabsmax}_{e\in\mathcal E(n)} z_e
+= z_{e^\star}, \qquad
+e^\star = \arg\max_{e\in\mathcal E(n)} |z_e|,
+\end{equation}
+
+which selects the largest-magnitude value while retaining its sign. The raw five-dimensional event vector is
+
+\begin{equation}
+\mathbf x_{\mathrm{raw}}^{\mathrm{evt}}(n)
+=
+\begin{bmatrix}
+\operatorname{sabsmax}(\mathrm{GoldsteinScale}) \\
+\sum_{e\in\mathcal E(n)} \mathrm{NumMentions}_e \\
+\sum_{e\in\mathcal E(n)} \mathrm{NumSources}_e \\
+\sum_{e\in\mathcal E(n)} \mathrm{NumArticles}_e \\
+\operatorname{sabsmax}(\mathrm{AvgTone})
+\end{bmatrix}.
+\end{equation}
+
+Missing or non-finite event values are excluded from the corresponding aggregation. If no valid value remains, the implementation uses a numeric fallback of zero. Each feature is subsequently standardized column-wise before entering the structured event encoder. To prevent temporal information leakage, the standardization mean and standard deviation must be estimated on the training split and then frozen for validation and test data. \hl{TODO: update and verify the current preprocessing pipeline so that it fits these statistics on training data only.}
+
+\subsection{Representative Reports and Risk Proxy}
+\label{app:risk-proxy}
+
+For a source article \(n\), let \(\mathcal E_{\mathrm{tone}}(n)\subseteq\mathcal E(n)\) denote its matched events with finite \(\mathrm{AvgTone}\). We define
+
+\begin{equation}
+\operatorname{ArticleScore}(n)
+=
+\frac{1}{|\mathcal E_{\mathrm{tone}}(n)|}
+\sum_{e\in\mathcal E_{\mathrm{tone}}(n)}
+\mathrm{AvgTone}_e.
+\end{equation}
+
+If \(\mathcal E_{\mathrm{tone}}(n)\) is empty, the current preprocessing rule assigns \(\operatorname{ArticleScore}(n)=0\).
+
+Within each theme and date, the representative report is the article maximizing \(\left|\operatorname{ArticleScore}(n)\right|\). This procedure yields 91 representative reports: 41 for Automaker and 50 for Nexperia. For the representative report \(n_{t,i}^{\star}\), we orient the target as
+
+\begin{equation}
+Y_{t,i}=-\operatorname{ArticleScore}(n_{t,i}^{\star}).
+\label{eq:adverse-risk-signal}
+\end{equation}
+
+Consequently, a larger value denotes more adverse media coverage and a smaller value denotes more favorable coverage. The magnitude reflects tone strength. We treat \(Y_{t,i}\) as a media-derived supply chain alert signal rather than a directly observed disruption cost, shortage quantity, or operational loss.
+
+\subsection{Study-Specific Supervision Weights}
+\label{app:supervision}
+
+The main formulation permits general nonnegative weights \(q_{t,i}\) on observed product--date pairs. In this study, let \(i_{\mathrm{up}}\) and \(i_{\mathrm{down}}\) denote HS4 3818 and HS4 8703, respectively, and define the label indicator
+
+\begin{equation}
+\omega_{t,i}=\mathbb{I}(i\in\Omega_t).
+\end{equation}
+
+The study-specific weights are
+
+\begin{equation}
+q_{t,i}
+=
+\begin{cases}
+\rho_{\mathrm{up}}\,\omega_{t,i_{\mathrm{up}}},
+& i=i_{\mathrm{up}},\\[3pt]
+\omega_{t,i_{\mathrm{down}}}
+\mathbb{I}\!\left(
+\omega_{t,i_{\mathrm{up}}}
++\omega_{t-1,i_{\mathrm{up}}}
++\omega_{t-1,i_{\mathrm{down}}}>0
+\right),
+& i=i_{\mathrm{down}},\\[3pt]
+0,
+& \text{otherwise},
+\end{cases}
+\label{eq:study-supervision}
+\end{equation}
+
+where \(\rho_{\mathrm{up}}>0\) controls the relative contribution of upstream observations, \(t-1\) is the preceding global event step, and \(\omega_{0,i}=0\) handles the left boundary. The current experiments use \(\rho_{\mathrm{up}}=1\). This weighting affects only which observed labels contribute to the loss; it does not provide any target value or target report to the model input.
+
+\subsection{Article-to-Product Mapping}
+
+The current study uses a predefined theme-to-product mapping:
+
+\begin{equation}
+\pi(\mathrm{Automaker}) = \mathrm{HS4}\ 8703,
+\qquad
+\pi(\mathrm{Nexperia}) = \mathrm{HS4}\ 3818.
+\end{equation}
+
+HS4 8703 denotes motor cars and other motor vehicles principally designed for transporting persons, while HS4 3818 denotes doped chemical elements and compounds in forms used in electronics, including discs and wafers. The mapping is a study-specific modeling choice rather than an annotation supplied by GDELT or learned by ChainCAST. \hl{TODO: add the domain rationale for these two mappings and, if available, a sensitivity analysis using plausible alternative product mappings.}
+
+\subsection{Temporal Splitting and Reproducibility}
+
+All train, validation, and test partitions must follow chronological order. Article selection, feature standardization, prompt optimization, model selection, and any other learned preprocessing decision must be restricted to information available within the corresponding training history. \hl{TODO: report the exact split dates, sample counts, and the audit confirming that every fitted preprocessing component uses training data only.} Source articles may become inaccessible or change after collection; the released metadata should therefore retain retrieval dates, source URLs, event identifiers, and processing status wherever licensing conditions permit.
+
+\bibliography{aaai2027}
+
+% Check whether the conference requires a reproducibility checklist to be included in the paper.
+% If so, you can uncomment the following line and ajust the path to include it.
+% \input{ReproducibilityChecklist.tex}
+
+\end{document}

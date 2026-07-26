@@ -186,10 +186,17 @@ def ensure_forecasts(
 ) -> pd.DataFrame:
     output_path = args.output_dir / "forecast_events.csv"
     existing = read_csv_or_empty(output_path)
-    existing_map: Dict[Tuple[str, str], Dict[str, Any]] = {}
+    existing_map: Dict[Tuple[str, int, str], Dict[str, Any]] = {}
     if not existing.empty:
         for _, row in existing.iterrows():
-            existing_map[(str(row.get("sample_id", "")), str(row.get("cache_key", "")))] = row.to_dict()
+            hypothesis_index = int(row.get("hypothesis_index", 0))
+            existing_map[
+                (
+                    str(row.get("sample_id", "")),
+                    hypothesis_index,
+                    str(row.get("cache_key", "")),
+                )
+            ] = row.to_dict()
 
     comp = compressions.copy()
     comp_by_id = comp.set_index("daily_id", drop=False)
@@ -216,57 +223,82 @@ def ensure_forecasts(
         )
         prompt_hash = stable_hash(prompt, length=32)
         history_cache = "|".join(history_rows["cache_key"].astype(str).tolist())
-        cache_key = stable_hash(sample["sample_id"], history_cache, prompt_hash, length=32)
-        cached = existing_map.get((sample["sample_id"], cache_key))
-        if cached and not args.force_llm:
-            cached_text = clean_generated_text(str(cached.get("predicted_event_text", "")))
-            if cached_text:
-                cached = dict(cached)
-                cached["predicted_event_text"] = cached_text
-                rows.append(cached)
-                continue
+        num_hypotheses = int(getattr(args, "num_hypotheses", 1))
+        for hypothesis_index in range(num_hypotheses):
+            cache_key = stable_hash(
+                sample["sample_id"],
+                history_cache,
+                prompt_hash,
+                f"hypothesis={hypothesis_index}",
+                length=32,
+            )
+            cached = existing_map.get(
+                (str(sample["sample_id"]), hypothesis_index, cache_key)
+            )
+            if cached and not args.force_llm:
+                cached_text = clean_generated_text(
+                    str(cached.get("predicted_event_text", ""))
+                )
+                if cached_text:
+                    cached = dict(cached)
+                    cached["predicted_event_text"] = cached_text
+                    cached["hypothesis_index"] = hypothesis_index
+                    cached["num_hypotheses"] = num_hypotheses
+                    rows.append(cached)
+                    continue
 
-        if llm is None:
-            llm = get_llm(args)
-        print(f"[forecast] {idx + 1}/{len(samples)} {sample['sample_id']} {sample['topic']}->{sample['target_date']}")
-        predicted_event = _generate_non_empty(
-            llm=llm,
-            prompt=prompt,
-            max_tokens=args.forecast_max_tokens,
-            args=args,
-            task="forecast",
-            item_id=f"sample {sample['sample_id']}",
-            prompt_hash=prompt_hash,
-            cache_key=cache_key,
-        )
+            if llm is None:
+                llm = get_llm(args)
+            print(
+                f"[forecast] {idx + 1}/{len(samples)} "
+                f"hypothesis={hypothesis_index + 1}/{num_hypotheses} "
+                f"{sample['sample_id']} {sample['topic']}->{sample['target_date']}"
+            )
+            predicted_event = _generate_non_empty(
+                llm=llm,
+                prompt=prompt,
+                max_tokens=args.forecast_max_tokens,
+                args=args,
+                task="forecast",
+                item_id=(
+                    f"sample {sample['sample_id']} "
+                    f"hypothesis {hypothesis_index + 1}/{num_hypotheses}"
+                ),
+                prompt_hash=prompt_hash,
+                cache_key=cache_key,
+            )
 
-        rows.append(
-            {
-                "sample_id": sample["sample_id"],
-                "split": sample["split"],
-                "topic": sample["topic"],
-                "hs_code_4d": sample["hs_code_4d"],
-                "hs_short_label": sample["hs_short_label"],
-                "target_date": sample["target_date"],
-                "target_article_score": sample["target_article_score"],
-                "target_daily_id": sample["target_daily_id"],
-                "topic_order": sample["topic_order"],
-                "history_len": sample["history_len"],
-                "history_start_date": sample["history_start_date"],
-                "last_history_date": sample["last_history_date"],
-                "history_daily_ids": sample["history_daily_ids"],
-                "history_dates": sample["history_dates"],
-                "history_compression_keys": history_cache,
-                "prompt_hash": prompt_hash,
-                "cache_key": cache_key,
-                "predicted_event_text": predicted_event,
-            }
-        )
-        if args.request_sleep > 0:
-            time.sleep(args.request_sleep)
-        save_csv(pd.DataFrame(rows), output_path)
+            rows.append(
+                {
+                    "sample_id": sample["sample_id"],
+                    "hypothesis_index": hypothesis_index,
+                    "num_hypotheses": num_hypotheses,
+                    "split": sample["split"],
+                    "topic": sample["topic"],
+                    "hs_code_4d": sample["hs_code_4d"],
+                    "hs_short_label": sample["hs_short_label"],
+                    "target_date": sample["target_date"],
+                    "target_article_score": sample["target_article_score"],
+                    "target_daily_id": sample["target_daily_id"],
+                    "topic_order": sample["topic_order"],
+                    "history_len": sample["history_len"],
+                    "history_start_date": sample["history_start_date"],
+                    "last_history_date": sample["last_history_date"],
+                    "history_daily_ids": sample["history_daily_ids"],
+                    "history_dates": sample["history_dates"],
+                    "history_compression_keys": history_cache,
+                    "prompt_hash": prompt_hash,
+                    "cache_key": cache_key,
+                    "predicted_event_text": predicted_event,
+                }
+            )
+            if args.request_sleep > 0:
+                time.sleep(args.request_sleep)
+            save_csv(pd.DataFrame(rows), output_path)
 
-    result = pd.DataFrame(rows).sort_values(["topic", "target_date"]).reset_index(drop=True)
+    result = pd.DataFrame(rows).sort_values(
+        ["topic", "target_date", "hypothesis_index"]
+    ).reset_index(drop=True)
     save_csv(result, output_path)
     return result
 
@@ -524,7 +556,10 @@ def optimize_prompt_with_language_feedback(
         ].copy()
         test_forecasts = ensure_forecasts(missing_test_samples, compressions, final_args)
         final_forecasts = pd.concat([best_round_forecasts, test_forecasts], ignore_index=True)
-    final_forecasts = final_forecasts.sort_values(["topic", "target_date"]).reset_index(drop=True)
+    final_sort_columns = ["topic", "target_date"]
+    if "hypothesis_index" in final_forecasts.columns:
+        final_sort_columns.append("hypothesis_index")
+    final_forecasts = final_forecasts.sort_values(final_sort_columns).reset_index(drop=True)
     save_csv(final_forecasts, final_dir / "forecast_events.csv")
     write_sample_metadata(samples, final_args)
     train_mlp(final_forecasts, final_args)

@@ -1,0 +1,13 @@
+# @package _global_
+defaults:
+  - /experiment/strict_rerun/00_base_final
+  - _self_
+
+output_dir: "${paths.root_dir}/outputs/strict_rerun/baselines/prospective_mlp"
+tensorboard_log_dir: "C:/tensorboard_logs/SCRiskPrediction/strict_rerun/baselines/prospective_mlp"
+propagation_model: "prospective_mlp"
+align_weight: 0.0
+smooth_weight: 0.0
+alignment_mode: "consensus"
+consensus_hypothesis_limit: 5
+prospective_embedding_dim: 768
